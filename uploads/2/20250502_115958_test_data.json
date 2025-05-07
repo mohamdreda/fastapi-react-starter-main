@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "Alice",
+    "age": 30,
+    "email": "alice@example.com",
+    "country": "FR",
+    "signup_date": "2023-01-15"
+  },
+  {
+    "id": 2,
+    "name": "Bob",
+    "age": null,
+    "email": "bob@example.com",
+    "country": "USA",
+    "signup_date": "2023-02-20"
+  }
+]
