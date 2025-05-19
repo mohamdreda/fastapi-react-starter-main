@@ -1,0 +1,11 @@
+id,name,age,gender,city,salary
+1,Alice,28,Female,Paris,35000
+2,Bob,35,Male,Lyon,40000
+3,Charlie,,Male,Marseille,38000
+4,David,45,,Lyon,42000
+5,Eva,29,Female,,39000
+6,Frank,33,Male,Bordeaux,
+7,Alice,28,Female,Paris,35000
+8,Grace,41,Female,Nice,47000
+9,Hugo,38,Male,Paris,45000
+10,Ivy,32,Female,Lyon,41000

@@ -9,6 +9,7 @@ from scipy import stats
 import json
 import os
 from typing import Dict, List, Any, Tuple, Optional
+from app.services.data_quality import DataQualityAnalyzer, NULL_INDICATORS
 
 async def generate_visualizations(file_path: str, file_type: str, viz_type: str):
     """Main visualization generation controller"""
@@ -53,246 +54,648 @@ def read_data_file(file_path: str, file_type: str):
     return read_dataframe(Path(file_path), file_type)
 
 async def generate_missing_analysis(df) -> dict:
-    """Generate missing values visualization and stats"""
-    # Create a copy to avoid modifying the original dataframe
-    df_copy = df.copy()
+    """Generate missing values visualization and stats using enhanced DataQualityAnalyzer"""
+    # Use the enhanced analyzer for comprehensive missing value detection
+    analyzer = DataQualityAnalyzer(df)
+    missing_analysis = analyzer.analyze_missing_values()
     
-    # Convert 'NaN' strings to actual NaN values
-    for col in df_copy.columns:
-        if df_copy[col].dtype == 'object':
-            # Replace 'NaN', 'nan', 'NA', empty strings with NaN
-            if isinstance(df_copy, dd.DataFrame):
-                df_copy[col] = df_copy[col].map(lambda x: pd.NA if pd.isna(x) or 
-                                              (isinstance(x, str) and x.lower() in ['nan', 'na', '']) else x, 
-                                              meta=(col, df_copy[col].dtype))
-            else:
-                df_copy[col] = df_copy[col].replace(['nan', 'NaN', 'NA', ''], pd.NA)
-                df_copy[col] = df_copy[col].apply(lambda x: pd.NA if pd.isna(x) else x)
+    # Ensure total_cells is present
+    if 'total_cells' not in missing_analysis:
+        # Calculate it if missing
+        total_cells = df.shape[0] * df.shape[1]
+        missing_analysis['total_cells'] = total_cells
     
-    # Calculate missing values
-    if isinstance(df_copy, dd.DataFrame):
-        missing_by_column = df_copy.isnull().sum().compute()
-        total_missing = missing_by_column.sum()
-        total_cells = df_copy.size.compute()
-    else:
-        missing_by_column = df_copy.isnull().sum()
-        total_missing = missing_by_column.sum()
-        total_cells = df_copy.size
-    
-    missing_percentage = (total_missing / total_cells * 100) if total_cells > 0 else 0.0
-    
-    # Create missing values heatmap
-    if isinstance(df_copy, dd.DataFrame):
-        sample_df = df_copy.head(1000)
+    # Get a sample for visualization
+    if isinstance(df, dd.DataFrame):
+        sample_df = df.head(1000)
     else:
         # Handle case where dataset has fewer than 1000 rows
-        sample_size = min(1000, len(df_copy))
-        sample_df = df_copy.sample(n=sample_size) if sample_size > 0 else df_copy
+        sample_size = min(1000, len(df))
+        sample_df = df.sample(n=sample_size) if sample_size > 0 else df
     
-    # Create heatmap
-    fig = px.imshow(sample_df.isnull().T,
-                   title="Missing Values Distribution",
-                   color_continuous_scale='Viridis',
-                   labels=dict(x="Row Index", y="Column", color="Is Missing"))
+    # Apply the same missing value detection to the sample
+    sample_analyzer = DataQualityAnalyzer(sample_df)
+    sample_missing = sample_analyzer.analyze_missing_values()
     
-    # Create column-wise missing values bar chart
-    missing_pct = (missing_by_column / (df_copy.shape[0] if isinstance(df_copy, pd.DataFrame) else df_copy.shape[0].compute())) * 100
-    missing_pct = missing_pct.sort_values(ascending=False)
+    # Create a DataFrame with missing values for visualization
+    # We need to recreate the sample with detected missing values
+    sample_copy = sample_df.copy()
     
-    # Only include columns with missing values
-    missing_pct = missing_pct[missing_pct > 0]
+    # Apply the comprehensive null detection to the sample
+    for col in sample_copy.columns:
+        # For object/string columns, check against string null indicators
+        if sample_copy[col].dtype == 'object':
+            # Create a mask for all string-based null indicators
+            null_mask = sample_copy[col].isin([ind for ind in NULL_INDICATORS if isinstance(ind, str)])
+            # Apply the mask by setting matching values to NaN
+            sample_copy.loc[null_mask, col] = np.nan
+        
+        # Try to convert to numeric to catch numeric null indicators
+        if sample_copy[col].dtype != 'datetime64[ns]':
+            try:
+                sample_copy[col] = pd.to_numeric(sample_copy[col], errors='coerce')
+            except Exception as e:
+                print(f"Error converting column {col} to numeric: {e}")
     
-    if len(missing_pct) > 0:
-        fig2 = px.bar(
-            x=missing_pct.index.tolist(),
-            y=missing_pct.values.tolist(),
-            title="Missing Values by Column (%)",
-            labels={"x": "Column", "y": "Missing (%)"}
-        )
-        fig2.update_layout(xaxis_tickangle=-45)
+    # Create a more detailed heatmap visualization of missing values
+    # First create a binary missing values matrix for the sample
+    missing_matrix = sample_copy.isna().astype(int)
+    
+    # Create a heatmap of missing values
+    fig_heatmap = px.imshow(
+        missing_matrix.T,  # Transpose for better visualization
+        color_continuous_scale=["#4682B4", "#FF7F50"],
+        labels=dict(x="Row Index", y="Column", color="Missing"),
+        title="Missing Values Heatmap (Sample)"
+    )
+    
+    fig_heatmap.update_layout(
+        height=600,
+        width=900,
+        xaxis_title="Row Index (Sample)",
+        yaxis_title="Column",
+        coloraxis_showscale=True,
+        coloraxis_colorbar=dict(title="Missing")
+    )
+    
+    # Create a missing values pattern heatmap
+    # This shows patterns of missing values across columns
+    if len(df.columns) > 1:  # Only if we have multiple columns
+        try:
+            # Create a correlation matrix of missing value patterns
+            missing_corr = missing_matrix.corr()
+            
+            # Create a heatmap of missing value correlations
+            fig_pattern = px.imshow(
+                missing_corr,
+                color_continuous_scale="RdBu_r",
+                labels=dict(x="Column", y="Column", color="Correlation"),
+                title="Missing Values Pattern Correlation"
+            )
+            
+            fig_pattern.update_layout(
+                height=600,
+                width=600
+            )
+        except Exception as e:
+            # If there's an error, create a placeholder
+            fig_pattern = None
     else:
-        # Create empty figure if no missing values
-        fig2 = go.Figure()
-        fig2.update_layout(title="No Missing Values Found")
+        fig_pattern = None
     
-    # Prepare per-column missing data
-    per_column_data = {}
-    for col, count in missing_by_column.items():
-        if count > 0:
-            per_column_data[col] = {
-                "count": int(count),
-                "percentage": round(float(missing_pct.get(col, 0)), 2)
-            }
+    # Create a bar chart of missing values by column
+    missing_counts = [missing_analysis['per_column'].get(col, {}).get('missing_count', 0) for col in df.columns]
+    missing_percentages = [missing_analysis['per_column'].get(col, {}).get('missing_percentage', 0) for col in df.columns]
     
+    # Sort columns by missing percentage
+    sorted_indices = np.argsort(missing_percentages)[::-1]
+    sorted_columns = [df.columns[i] for i in sorted_indices]
+    sorted_percentages = [missing_percentages[i] for i in sorted_indices]
+    
+    # Filter out columns with no missing values
+    non_zero_indices = [i for i, p in enumerate(sorted_percentages) if p > 0]
+    plot_columns = [sorted_columns[i] for i in non_zero_indices]
+    plot_percentages = [sorted_percentages[i] for i in non_zero_indices]
+    
+    if plot_columns:
+        fig_bar = px.bar(
+            x=plot_columns,
+            y=plot_percentages,
+            labels={'x': 'Column', 'y': 'Missing (%)'},
+            title="Missing Values by Column (%)",
+            color_discrete_sequence=['#FF7F50']
+        )
+        
+        fig_bar.update_layout(
+            xaxis={'categoryorder': 'total descending'},
+            height=500,
+            width=800
+        )
+        
+        # Pie chart for overall missing vs. non-missing
+        total_missing = missing_analysis['total_missing']
+        total_cells = missing_analysis['total_cells']
+        
+        # Calculate exact percentages to ensure they sum to 100%
+        missing_pct = 100 * (total_missing / total_cells) if total_cells > 0 else 0
+        non_missing_pct = 100 - missing_pct  # This ensures they sum to exactly 100%
+        
+        fig_pie = px.pie(
+            values=[missing_pct, non_missing_pct],  # Use percentages directly
+            names=['Missing', 'Non-Missing'],
+            title=f"Overall Missing Values: {missing_pct:.2f}%",
+            color_discrete_sequence=['#FF7F50', '#4682B4']
+        )
+    
+    # Create a table showing examples of missing values
+    examples_data = []
+    
+    for col, stats in missing_analysis['per_column'].items():
+        if 'examples' in stats and stats['examples']:
+            for example in stats['examples']:
+                examples_data.append({
+                    'Column': col,
+                    'Row Index': example['row_index'],
+                    'Original Value': example['original_value'],
+                    'Detected As': example['detected_as']
+                })
+    
+    fig_examples = None
+    if examples_data:
+        examples_df = pd.DataFrame(examples_data)
+        fig_examples = go.Figure(
+            data=[go.Table(
+                header=dict(
+                    values=list(examples_df.columns),
+                    fill_color='paleturquoise',
+                    align='left'
+                ),
+                cells=dict(
+                    values=[examples_df[col] for col in examples_df.columns],
+                    fill_color='lavender',
+                    align='left'
+                )
+            )]
+        )
+        fig_examples.update_layout(
+            title="Examples of Detected Missing Values"
+        )
+    
+    # Return in a format expected by the frontend
+    # The frontend expects a 'plot' property with 'data' and 'layout'
     return {
-        "plot": plotly_to_json(fig),
-        "column_plot": plotly_to_json(fig2),
+        "plot": plotly_to_json(fig_pie),  # Use the pie chart as the main plot
+        "additional_plots": {
+            "bar_chart": plotly_to_json(fig_bar),
+            "examples_table": plotly_to_json(fig_examples) if fig_examples else None,
+            "heatmap": plotly_to_json(fig_heatmap),
+            "pattern_heatmap": plotly_to_json(fig_pattern) if fig_pattern else None
+        },
         "stats": {
-            "total_missing": int(total_missing),
-            "missing_percentage": round(missing_percentage, 2),
-            "total_cells": int(total_cells),
-            "per_column": per_column_data
+            "total_missing": missing_analysis['total_missing'],
+            "missing_percentage": missing_analysis['missing_percentage'],
+            "missing_by_column": {col: stats for col, stats in missing_analysis['per_column'].items()},
+            "null_indicators_used": missing_analysis.get('null_indicators_used', []),
+            "null_indicators_checked": missing_analysis.get('null_indicators_checked', [])
         }
     }
 
 async def generate_duplicates_analysis(df) -> dict:
-    """Analyze and visualize duplicate rows"""
-    # Create a copy to avoid modifying the original dataframe
-    df_copy = df.copy()
+    """Generate visualizations and statistics for duplicate rows"""
+    if df.empty:
+        return {"error": "Dataset is empty"}
     
-    # Detect exact duplicates (keep=False marks all duplicates, not just second occurrences)
-    if isinstance(df_copy, dd.DataFrame):
-        exact_duplicates = df_copy.duplicated(keep=False).sum().compute()
-        total_rows = df_copy.shape[0].compute()
-    else:
-        exact_duplicates = df_copy.duplicated(keep=False).sum()
-        total_rows = len(df_copy)
+    # Use the enhanced analyzer for context-aware duplicate detection with near-duplicate detection
+    analyzer = DataQualityAnalyzer(df)
     
-    # Prepare data for visualization
-    duplicate_info = {
-        "exact_duplicates": int(exact_duplicates),
-        "total_rows": int(total_rows)
-    }
-    
-    # Find near-duplicates (focusing on common data columns, not IDs)
-    try:
-        # Identify potential data columns (exclude ID-like columns)
-        exclude_cols = [col for col in df_copy.columns if col.lower() in ['id', 'index', 'key', 'uuid']]
-        data_cols = [col for col in df_copy.columns if col not in exclude_cols]
-        
-        # For near-duplicates, focus on string columns that might have case differences
-        string_cols = df_copy.select_dtypes(include=['object']).columns.tolist()
-        
-        # Find case-insensitive duplicates in string columns
-        near_duplicates = 0
-        duplicate_examples = []
-        
-        if not isinstance(df_copy, dd.DataFrame) and len(string_cols) > 0:
-            # Create lowercase version for string columns
-            df_lower = df_copy.copy()
-            for col in string_cols:
-                if col in df_lower.columns:
-                    df_lower[col] = df_lower[col].astype(str).str.lower()
-            
-            # Find rows that are duplicates when case-insensitive but not exact duplicates
-            case_insensitive_dupes = df_lower.duplicated(subset=string_cols, keep=False)
-            exact_dupes = df_copy.duplicated(subset=string_cols, keep=False)
-            near_dupes = case_insensitive_dupes & ~exact_dupes
-            near_duplicates = near_dupes.sum()
-            
-            # Get examples of near-duplicates for the report
-            if near_duplicates > 0:
-                near_dupe_indices = df_copy[near_dupes].index[:5]  # Limit to 5 examples
-                for idx in near_dupe_indices:
-                    row = df_copy.loc[idx]
-                    # Find the matching case-insensitive rows
-                    matches = []
-                    for col in string_cols:
-                        if pd.notna(row[col]):
-                            matches_col = df_copy[df_copy[col].str.lower() == str(row[col]).lower()]
-                            if len(matches_col) > 1:  # More than 1 means there's a match besides itself
-                                matches.append({
-                                    "column": col,
-                                    "value": row[col],
-                                    "matches": matches_col[col].tolist()[:3]  # Limit to 3 matches
-                                })
-                    if matches:
-                        duplicate_examples.append({
-                            "row_index": int(idx),
-                            "matches": matches
-                        })
-        
-        duplicate_info["near_duplicates"] = int(near_duplicates)
-        duplicate_info["total_duplicates"] = int(exact_duplicates + near_duplicates)
-        duplicate_info["duplicate_examples"] = duplicate_examples[:5]  # Limit examples
-    except Exception as e:
-        # If near-duplicate detection fails, just use exact duplicates
-        duplicate_info["near_duplicates"] = 0
-        duplicate_info["total_duplicates"] = int(exact_duplicates)
-        duplicate_info["error"] = str(e)
-    
-    # Create visualization
-    categories = ["Unique Rows", "Exact Duplicates"]
-    values = [total_rows - exact_duplicates, exact_duplicates]
-    
-    if "near_duplicates" in duplicate_info and duplicate_info["near_duplicates"] > 0:
-        categories.append("Near Duplicates")
-        values.append(duplicate_info["near_duplicates"])
-    
-    fig = px.bar(
-        x=categories,
-        y=values,
-        title="Duplicate Rows Analysis",
-        labels={"x": "Row Type", "y": "Count"},
-        color=categories,
-        color_discrete_map={
-            "Unique Rows": "green",
-            "Exact Duplicates": "red",
-            "Near Duplicates": "orange"
-        }
+    # Run three different duplicate analyses with different settings
+    standard_duplicates = analyzer.analyze_duplicates(
+        case_sensitive=True, 
+        ignore_whitespace=False, 
+        exclude_id_columns=False,
+        similarity_threshold=1.0  # Exact matches only
     )
     
-    # Add percentage labels on top of bars
-    for i, value in enumerate(values):
-        percentage = (value / total_rows) * 100
-        fig.add_annotation(
-            x=categories[i],
-            y=value,
-            text=f"{percentage:.1f}%",
-            showarrow=False,
-            yshift=10
-        )
+    normalized_duplicates = analyzer.analyze_duplicates(
+        case_sensitive=False, 
+        ignore_whitespace=True, 
+        exclude_id_columns=False,
+        similarity_threshold=1.0  # Exact matches with normalization
+    )
     
-    return {
-        "plot": plotly_to_json(fig),
-        "stats": {
-            "exact_duplicates": duplicate_info["exact_duplicates"],
-            "near_duplicates": duplicate_info.get("near_duplicates", 0),
-            "total_duplicates": duplicate_info.get("total_duplicates", duplicate_info["exact_duplicates"]),
-            "duplicate_percentage": round((duplicate_info.get("total_duplicates", duplicate_info["exact_duplicates"]) / total_rows) * 100, 2),
-            "total_rows": duplicate_info["total_rows"],
-            "examples": duplicate_info.get("duplicate_examples", [])
-        }
+    smart_duplicates = analyzer.analyze_duplicates(
+        case_sensitive=False, 
+        ignore_whitespace=True, 
+        exclude_id_columns=True,
+        similarity_threshold=0.9  # Include near-duplicates
+    )
+    
+    # Create comparison visualization
+    comparison_data = {
+        'Analysis Type': [
+            'Standard (Exact Match)', 
+            'Normalized (Case-Insensitive, Ignore Whitespace)',
+            'Smart (Normalized + Exclude ID + Near-Duplicates)'
+        ],
+        'Duplicate Count': [
+            standard_duplicates['duplicate_count'],
+            normalized_duplicates['duplicate_count'],
+            smart_duplicates['duplicate_count']
+        ],
+        'Duplicate Percentage': [
+            standard_duplicates['duplicate_percentage'],
+            normalized_duplicates['duplicate_percentage'],
+            smart_duplicates['duplicate_percentage']
+        ]
     }
+    
+    comparison_df = pd.DataFrame(comparison_data)
+    
+    # Create bar chart comparing different duplicate detection methods
+    fig_comparison = px.bar(
+        comparison_df,
+        x='Analysis Type',
+        y='Duplicate Count',
+        title="Duplicate Detection Comparison",
+        text='Duplicate Count'
+    )
+    fig_comparison.update_layout(xaxis_tickangle=-45)
+    
+    # Create a pie chart showing the proportion of duplicates
+    # Calculate percentages for pie chart
+    duplicate_percentage = smart_duplicates['duplicate_percentage']
+    non_duplicate_percentage = 100 - duplicate_percentage
+    
+    # Round to ensure they sum to exactly 100%
+    duplicate_percentage_rounded = round(duplicate_percentage, 1)
+    non_duplicate_percentage_rounded = round(100 - duplicate_percentage_rounded, 1)
+    
+    # Create pie chart
+    fig_pie = go.Figure()
+    fig_pie.add_trace(go.Pie(
+        labels=["Non-Duplicate", "Duplicate"],
+        values=[non_duplicate_percentage_rounded, duplicate_percentage_rounded],
+        textinfo="percent",
+        insidetextorientation="radial",
+        marker=dict(
+            colors=["#FF9D5C", "#4C78A8"],  # Orange for non-duplicates, blue for duplicates
+        ),
+        hoverinfo="label+percent",
+        textfont=dict(size=14),
+    ))
+    
+    # Update layout
+    fig_pie.update_layout(
+        title={
+            "text": "Duplicate Rows Distribution",
+            "x": 0.5,
+            "font": {"size": 18}
+        },
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=20, r=20, t=60, b=20),
+        height=400,
+        annotations=[
+            dict(
+                text=f"Overall Duplicate Rows: {duplicate_percentage_rounded}%",
+                x=0.5, y=-0.15,
+                xref="paper", yref="paper",
+                showarrow=False,
+                font=dict(size=14)
+            )
+        ]
+    )
+    
+    # Create a heatmap showing where duplicates are located in the dataset
+    # First, get a sample of the data with duplicate flags
+    if isinstance(df, dd.DataFrame):
+        sample_df = df.head(1000)
+    else:
+        sample_size = min(1000, len(df))
+        sample_df = df.sample(n=sample_size) if sample_size > 0 else df
+    
+    # Create a duplicate flag array
+    duplicate_flags = np.zeros(len(sample_df))
+    
+    # Mark rows that are duplicates
+    # Check if duplicate_groups exists in the dictionary
+    if 'duplicate_groups' in smart_duplicates and smart_duplicates['duplicate_groups']:
+        try:
+            for group in smart_duplicates['duplicate_groups']:
+                if 'indices' in group:
+                    for idx in group['indices']:
+                        if isinstance(idx, (int, np.integer)) and idx < len(duplicate_flags):
+                            duplicate_flags[idx] = 1
+        except Exception as e:
+            print(f"Error processing duplicate groups: {e}")
+    elif 'examples' in smart_duplicates and smart_duplicates['examples']:
+        # Fall back to examples if duplicate_groups is not available
+        try:
+            for example in smart_duplicates['examples']:
+                if 'original_index' in example and isinstance(example['original_index'], (int, np.integer)):
+                    idx = example['original_index']
+                    if idx < len(duplicate_flags):
+                        duplicate_flags[idx] = 1
+                if 'duplicate_index' in example and isinstance(example['duplicate_index'], (int, np.integer)):
+                    idx = example['duplicate_index']
+                    if idx < len(duplicate_flags):
+                        duplicate_flags[idx] = 1
+        except Exception as e:
+            print(f"Error processing duplicate examples: {e}")
+    
+    # Create a heatmap showing duplicate locations
+    duplicate_df = pd.DataFrame({
+        'Row Index': range(len(sample_df)),
+        'Is Duplicate': duplicate_flags
+    })
+    
+    fig_heatmap = px.imshow(
+        duplicate_flags.reshape(1, -1),
+        color_continuous_scale=["#4682B4", "#FF7F50"],
+        labels=dict(x="Row Index", y="", color="Is Duplicate"),
+        title="Duplicate Rows Location Heatmap (Sample)"
+    )
+    
+    fig_heatmap.update_layout(
+        height=200,
+        width=900,
+        yaxis_visible=False,
+        coloraxis_showscale=True,
+        coloraxis_colorbar=dict(title="Is Duplicate")
+    )
+    
+    # Create a table of duplicate examples if available
+    fig_examples = None
+    examples_data = []
+    
+    # First try to use duplicate_groups if available
+    if 'duplicate_groups' in smart_duplicates and smart_duplicates['duplicate_groups']:
+        try:
+            # Get the first 5 duplicate groups
+            for i, group in enumerate(smart_duplicates['duplicate_groups'][:5]):
+                if 'indices' in group:
+                    for j, row_index in enumerate(group['indices']):
+                        if not isinstance(row_index, (int, np.integer)):
+                            continue
+                            
+                        # Get row data for display
+                        row_data = {}
+                        
+                        # Add group identifier
+                        row_data['Duplicate Group'] = f"Group {i+1}"
+                        row_data['Row Index'] = row_index
+                        
+                        # Add a few key columns for context
+                        for col in list(df.columns)[:5]:  # Show first 5 columns
+                            try:
+                                if isinstance(df, dd.DataFrame):
+                                    # For Dask, we need to compute the value
+                                    row_data[col] = str(df[col].compute().iloc[row_index])
+                                else:
+                                    row_data[col] = str(df[col].iloc[row_index])
+                            except Exception as e:
+                                row_data[col] = f"Error: {str(e)}"
+                        
+                        examples_data.append(row_data)
+        except Exception as e:
+            print(f"Error creating examples table from duplicate_groups: {e}")
+    
+    # Fall back to examples if duplicate_groups is not available or failed
+    if not examples_data and 'examples' in smart_duplicates and smart_duplicates['examples']:
+        try:
+            for i, example in enumerate(smart_duplicates['examples'][:5]):
+                # Process original row
+                if 'original_index' in example and isinstance(example['original_index'], (int, np.integer)):
+                    row_data = {}
+                    row_data['Duplicate Group'] = f"Pair {i+1}"
+                    row_data['Row Type'] = 'Original'
+                    row_data['Row Index'] = example['original_index']
+                    
+                    # Add sample columns
+                    for col in list(df.columns)[:5]:
+                        try:
+                            if isinstance(df, dd.DataFrame):
+                                row_data[col] = str(df[col].compute().iloc[example['original_index']])
+                            else:
+                                row_data[col] = str(df[col].iloc[example['original_index']])
+                        except Exception as e:
+                            row_data[col] = f"Error: {str(e)}"
+                    
+                    examples_data.append(row_data)
+                
+                # Process duplicate row
+                if 'duplicate_index' in example and isinstance(example['duplicate_index'], (int, np.integer)):
+                    row_data = {}
+                    row_data['Duplicate Group'] = f"Pair {i+1}"
+                    row_data['Row Type'] = 'Duplicate'
+                    row_data['Row Index'] = example['duplicate_index']
+                    
+                    # Add sample columns
+                    for col in list(df.columns)[:5]:
+                        try:
+                            if isinstance(df, dd.DataFrame):
+                                row_data[col] = str(df[col].compute().iloc[example['duplicate_index']])
+                            else:
+                                row_data[col] = str(df[col].iloc[example['duplicate_index']])
+                        except Exception as e:
+                            row_data[col] = f"Error: {str(e)}"
+                    
+                    examples_data.append(row_data)
+        except Exception as e:
+            print(f"Error creating examples table from examples: {e}")
+        
+        if examples_data:
+            examples_df = pd.DataFrame(examples_data)
+            fig_examples = go.Figure(
+                data=[go.Table(
+                    header=dict(
+                        values=list(examples_df.columns),
+                        fill_color='paleturquoise',
+                        align='left'
+                    ),
+                    cells=dict(
+                        values=[examples_df[col] for col in examples_df.columns],
+                        fill_color='lavender',
+                        align='left'
+                    )
+                )]
+            )
+            fig_examples.update_layout(
+                title="Examples of Detected Duplicates"
+            )
+    
+    # Create a table showing excluded ID columns if any
+    fig_id_cols = None
+    if smart_duplicates['id_columns_excluded']:
+        id_cols_data = {
+            'ID Column': smart_duplicates['id_columns_excluded'],
+            'Reason': ['Detected as ID column based on name and content' for _ in smart_duplicates['id_columns_excluded']]
+        }
+        id_cols_df = pd.DataFrame(id_cols_data)
+        
+        fig_id_cols = go.Figure(data=[go.Table(
+            header=dict(
+                values=list(id_cols_df.columns),
+                fill_color='paleturquoise',
+                align='left'
+            ),
+            cells=dict(
+                values=[id_cols_df[col] for col in id_cols_df.columns],
+                fill_color='lavender',
+                align='left'
+            )
+        )])
+        fig_id_cols.update_layout(title="ID Columns Excluded from Duplicate Detection")
+    
+    # Return in a format expected by the frontend
+    # The frontend expects a 'plot' property with 'data' and 'layout'
+    return {
+        "plot": plotly_to_json(fig_comparison),  # Main plot is the comparison bar chart
+        "additional_plots": {
+            "pie_chart": plotly_to_json(fig_pie),
+            "heatmap": plotly_to_json(fig_heatmap),
+            "examples": plotly_to_json(fig_examples) if fig_examples else None,
+            "id_columns": plotly_to_json(fig_id_cols) if fig_id_cols else None
+        },
+        "stats": {
+            "standard": {
+                "duplicate_count": standard_duplicates['duplicate_count'],
+                "duplicate_percentage": standard_duplicates['duplicate_percentage']
+            },
+            "normalized": {
+                "duplicate_count": normalized_duplicates['duplicate_count'],
+                "duplicate_percentage": normalized_duplicates['duplicate_percentage'],
+                "ignore_whitespace": normalized_duplicates['ignore_whitespace']
+            },
+            "smart": {
+                "duplicate_count": smart_duplicates['duplicate_count'],
+                "duplicate_percentage": smart_duplicates['duplicate_percentage'],
+                "id_columns_excluded": smart_duplicates['id_columns_excluded'],
+                "columns_checked": smart_duplicates['columns_checked'],
+                "near_duplicate_count": smart_duplicates.get('near_duplicate_count', 0),
+                "similarity_threshold": smart_duplicates.get('similarity_threshold', 0.9)
+            }
+        },
+        "total_rows": analyzer.total_rows,
+        "duplicate_rows": smart_duplicates['duplicate_count'],
+        "duplicate_percentage": smart_duplicates['duplicate_percentage'],
+        "additional_duplicates_found": smart_duplicates['duplicate_count'] - standard_duplicates['duplicate_count']
+    }
+
 
 async def generate_categorical_analysis(df) -> dict:
-    """Analyze categorical columns distribution"""
-    cat_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+    """Analyze and visualize categorical columns with enhanced validation"""
+    if df.empty:
+        return {"error": "Dataset is empty"}
+    
+    # Use the enhanced analyzer for comprehensive categorical analysis
+    analyzer = DataQualityAnalyzer(df)
+    categorical_analysis = analyzer.analyze_categorical_columns()
+    categorical_cols = categorical_analysis['categorical_columns']
+    
+    if not categorical_cols:
+        return {"error": "No categorical columns identified"}
+    
+    # Analyze each categorical column
     analysis = {}
-    
-    for col in cat_cols:
-        if isinstance(df, dd.DataFrame):
-            counts = df[col].value_counts().compute()
-        else:
-            counts = df[col].value_counts()
-        
-        analysis[col] = {
-            "unique_count": len(counts),
-            "top_values": counts.head(5).to_dict()
-        }
-    
     plot_data = {}
-    if cat_cols:
-        col = cat_cols[0]
-        # Get top 10 categories or all if fewer than 10
-        sample_size = min(10, len(counts))
-        sample_counts = counts.head(sample_size)
+    issue_tables = {}
+    
+    for col in categorical_cols:
+        col_analysis = categorical_analysis['analysis'][col]
         
-        if not sample_counts.empty:
-            fig = px.pie(
-                names=sample_counts.index,
-                values=sample_counts.values,
-                title=f"Category Distribution: {col}"
-            )
-            plot_data = plotly_to_json(fig)
+        # Get value counts from the analysis
+        top_values = col_analysis['top_values']
+        
+        # Store analysis with enhanced information
+        analysis[col] = {
+            "unique_values": col_analysis['unique_values'],
+            "top_values": top_values,
+            "missing_count": col_analysis['missing_count'],
+            "has_case_inconsistencies": len(col_analysis['case_inconsistencies']) > 0,
+            "has_standardization_issues": len(col_analysis['standardization_issues']) > 0,
+            "has_invalid_values": len(col_analysis['invalid_values']) > 0,
+            "has_quality_issues": col_analysis['has_quality_issues']
+        }
+        
+        # Create pie chart for distribution
+        values_for_chart = [item for item in top_values if item['count'] > 0][:6]  # Top 6 non-zero values
+        
+        # If there are more values, add an "Other" category
+        total_shown = sum(item['count'] for item in values_for_chart)
+        total_all = sum(item['count'] for item in top_values)
+        
+        if total_shown < total_all:
+            other_count = total_all - total_shown
+            values_for_chart.append({
+                'value': 'Other',
+                'count': other_count,
+                'percentage': (other_count / total_all) * 100,
+                'is_valid': True
+            })
+        
+        # Create the pie chart
+        fig = px.pie(
+            names=[item['value'] for item in values_for_chart],
+            values=[item['count'] for item in values_for_chart],
+            title=f"Category Distribution: {col}",
+            color_discrete_sequence=px.colors.qualitative.Safe
+        )
+        
+        # Add a hover template that shows validity
+        fig.update_traces(
+            hovertemplate='<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}<extra></extra>'
+        )
+        
+        plot_data[col] = plotly_to_json(fig)
+        
+        # Create tables for issues if any exist
+        issues_data = []
+        
+        # Add case inconsistencies
+        for case_issue in col_analysis['case_inconsistencies']:
+            for variation in case_issue['variations']:
+                issues_data.append({
+                    'Issue Type': 'Case Inconsistency',
+                    'Base Value': case_issue['base_value'],
+                    'Variation': variation,
+                    'Count': case_issue['counts'].get(variation, 0),
+                    'Recommendation': f"Standardize to '{case_issue['base_value']}'"
+                })
+        
+        # Add standardization issues
+        for std_issue in col_analysis['standardization_issues']:
+            for variation in std_issue['found_variations']:
+                issues_data.append({
+                    'Issue Type': 'Standardization',
+                    'Base Value': '/'.join(std_issue['standard_options']),
+                    'Variation': variation,
+                    'Count': std_issue['counts'].get(variation, 0),
+                    'Recommendation': f"Standardize to one of {std_issue['standard_options']}"
+                })
+        
+        # Add invalid values
+        for invalid in col_analysis['invalid_values']:
+            issues_data.append({
+                'Issue Type': 'Invalid Value',
+                'Base Value': 'N/A',
+                'Variation': invalid,
+                'Count': sum(1 for item in top_values if item['value'] == invalid),
+                'Recommendation': 'Replace with valid value'
+            })
+        
+        # Create a table for the issues if any exist
+        if issues_data:
+            issues_df = pd.DataFrame(issues_data)
+            fig_issues = go.Figure(data=[go.Table(
+                header=dict(
+                    values=list(issues_df.columns),
+                    fill_color='paleturquoise',
+                    align='left'
+                ),
+                cells=dict(
+                    values=[issues_df[col] for col in issues_df.columns],
+                    fill_color='lavender',
+                    align='left'
+                )
+            )])
+            fig_issues.update_layout(title=f"Quality Issues in Column: {col}")
+            issue_tables[col] = plotly_to_json(fig_issues)
+    
+    # Select the first column with issues as the main plot, or the first column if none have issues
+    main_col = next((col for col in categorical_cols if analysis[col]['has_quality_issues']), categorical_cols[0])
     
     return {
-        "plot": plot_data,
+        "plot": plot_data[main_col],  # Main plot
+        "all_plots": plot_data,
+        "issue_tables": issue_tables,
         "analysis": analysis
     }
-
 async def generate_outlier_analysis(df) -> dict:
     """Detect and visualize outliers in numerical columns"""
+    if df.empty:
+        return {"error": "Dataset is empty"}
+        
     # Create a copy to avoid modifying the original dataframe
     df_copy = df.copy()
     
@@ -304,8 +707,51 @@ async def generate_outlier_analysis(df) -> dict:
     if not num_cols:
         return {"error": "No numerical columns found in the dataset"}
     
+    # Use the DataQualityAnalyzer to detect outliers
+    analyzer = DataQualityAnalyzer(df)
+    
     outliers_data = {}
     plots = {}
+    
+    # Filter out extreme outliers for better visualization
+    df_filtered = df_copy.copy()
+    
+    for col in num_cols:
+        # Calculate IQR and outlier boundaries
+        q1 = df_copy[col].quantile(0.25)
+        q3 = df_copy[col].quantile(0.75)
+        iqr = q3 - q1
+        lower_bound = q1 - 3 * iqr  # More conservative: 3 * IQR instead of 1.5 * IQR
+        upper_bound = q3 + 3 * iqr
+        
+        # Identify outliers
+        outliers = df_copy[(df_copy[col] < lower_bound) | (df_copy[col] > upper_bound)]
+        
+        if not outliers.empty:
+            # Store outlier information
+            outlier_percentage = len(outliers) / len(df_copy) * 100
+            # Use round() function instead of .round() method
+            outliers_data[col] = {
+                'count': len(outliers),
+                'percentage': round(outlier_percentage, 2),
+                'min_value': float(df_copy[col].min()),
+                'max_value': float(df_copy[col].max()),
+                'lower_bound': float(lower_bound),
+                'upper_bound': float(upper_bound),
+                'examples': outliers[col].head(5).tolist()
+            }
+            
+            # Filter extreme outliers for visualization purposes
+            extreme_outliers = df_copy[(df_copy[col] < q1 - 5 * iqr) | (df_copy[col] > q3 + 5 * iqr)]
+            if not extreme_outliers.empty:
+                # Replace extreme outliers with boundary values for visualization only
+                extreme_low_mask = df_filtered[col] < q1 - 5 * iqr
+                extreme_high_mask = df_filtered[col] > q3 + 5 * iqr
+                
+                if extreme_low_mask.any():
+                    df_filtered.loc[extreme_low_mask, col] = q1 - 5 * iqr
+                if extreme_high_mask.any():
+                    df_filtered.loc[extreme_high_mask, col] = q3 + 5 * iqr
     
     for col in num_cols:
         if isinstance(df_copy, dd.DataFrame):
@@ -523,11 +969,18 @@ async def generate_structure_analysis(df) -> dict:
     
     fig.update_layout(title="Dataset Structure")
     
+    # Convert numpy types to Python native types for JSON serialization
+    if isinstance(shape[0], np.integer):
+        shape = (int(shape[0]), int(shape[1]))
+    
+    if memory_usage is not None and isinstance(memory_usage, np.integer):
+        memory_usage = int(memory_usage)
+    
     return {
         "plot": plotly_to_json(fig),
         "stats": {
             "shape": shape,
-            "columns": len(df.columns),
+            "columns": int(len(df.columns)),
             "memory_usage": memory_usage,
             "columns_info": columns_info
         }
@@ -541,11 +994,11 @@ async def generate_distribution_analysis(df) -> dict:
     
     distributions = {}
     histograms = {}
+    bar_charts = {}
+    pie_charts = {}
     
-    # Process numerical columns
-    if num_cols:
-        # Select first numerical column for visualization
-        col = num_cols[0]
+    # Process numerical columns - create histograms for all numerical columns
+    for col in num_cols[:5]:  # Limit to first 5 columns for performance
         if isinstance(df, dd.DataFrame):
             sample_df = df.head(10000)
             values = sample_df[col].dropna().values
@@ -555,60 +1008,154 @@ async def generate_distribution_analysis(df) -> dict:
             values = sample_df[col].dropna().values
         
         if len(values) > 0:
-            # Create histogram
+            # Create enhanced histogram with multiple visualization options
             fig = px.histogram(
                 sample_df, x=col,
                 title=f"Distribution of {col}",
-                marginal="box"  # Add a box plot on the margins
+                marginal="box",  # Add a box plot on the margins
+                histnorm="probability density",  # Normalize to show probability density
+                color_discrete_sequence=['#4682B4']
             )
+            
+            # Add KDE (Kernel Density Estimate) curve
+            try:
+                kde = stats.gaussian_kde(values)
+                x_range = np.linspace(min(values), max(values), 1000)
+                y_kde = kde(x_range)
+                fig.add_trace(go.Scatter(
+                    x=x_range, y=y_kde,
+                    mode='lines', name='KDE',
+                    line=dict(color='#FF7F50', width=2)
+                ))
+            except Exception as e:
+                # Skip KDE if there's an error (e.g., all values are identical)
+                pass
+            
+            # Add mean and median lines
+            mean_val = np.mean(values)
+            median_val = np.median(values)
+            
+            fig.add_vline(x=mean_val, line_dash="dash", line_color="red",
+                         annotation_text=f"Mean: {mean_val:.2f}", annotation_position="top right")
+            fig.add_vline(x=median_val, line_dash="dash", line_color="green",
+                         annotation_text=f"Median: {median_val:.2f}", annotation_position="top left")
+            
+            fig.update_layout(
+                height=500,
+                width=800,
+                xaxis_title=col,
+                yaxis_title="Density",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+            
             histograms[col] = plotly_to_json(fig)
             
-            # Calculate distribution statistics
+            # Calculate comprehensive distribution statistics
             distributions[col] = {
                 "mean": float(np.mean(values)),
                 "median": float(np.median(values)),
                 "std": float(np.std(values)),
                 "min": float(np.min(values)),
                 "max": float(np.max(values)),
+                "q1": float(np.percentile(values, 25)),
+                "q3": float(np.percentile(values, 75)),
+                "iqr": float(np.percentile(values, 75) - np.percentile(values, 25)),
                 "skewness": float(stats.skew(values)) if len(values) > 2 else None,
-                "kurtosis": float(stats.kurtosis(values)) if len(values) > 2 else None
+                "kurtosis": float(stats.kurtosis(values)) if len(values) > 2 else None,
+                "normality": float(stats.normaltest(values)[0]) if len(values) > 8 else None
             }
     
-    # Process categorical columns
+    # Process categorical columns - create bar charts and pie charts
     cat_distributions = {}
-    bar_charts = {}
     
-    if cat_cols:
-        # Select first categorical column for visualization
-        col = cat_cols[0]
+    for col in cat_cols[:5]:  # Limit to first 5 columns for performance
         if isinstance(df, dd.DataFrame):
-            value_counts = df[col].value_counts().compute().head(15)
+            sample_df = df.head(10000)
+            value_counts = sample_df[col].value_counts().compute().head(20)
         else:
-            value_counts = df[col].value_counts().head(15)
+            sample_size = min(10000, len(df))
+            sample_df = df.sample(n=sample_size) if sample_size > 0 else df
+            value_counts = sample_df[col].value_counts().head(20)
         
         if not value_counts.empty:
-            # Create bar chart
-            fig = px.bar(
+            # Calculate percentages for each category
+            total = value_counts.sum()
+            percentages = [(count / total * 100) for count in value_counts.values]
+            
+            # Create enhanced bar chart with percentages
+            fig_bar = go.Figure()
+            
+            # Add bars for counts
+            fig_bar.add_trace(go.Bar(
                 x=value_counts.index,
                 y=value_counts.values,
-                title=f"Distribution of {col}",
-                labels={"x": col, "y": "Count"}
-            )
-            bar_charts[col] = plotly_to_json(fig)
+                name="Count",
+                marker_color='#4682B4'
+            ))
             
-            # Calculate distribution statistics
+            # Add line for percentages
+            fig_bar.add_trace(go.Scatter(
+                x=value_counts.index,
+                y=percentages,
+                name="Percentage",
+                yaxis="y2",
+                mode="lines+markers",
+                marker=dict(color='#FF7F50', size=8),
+                line=dict(color='#FF7F50', width=2)
+            ))
+            
+            fig_bar.update_layout(
+                title=f"Distribution of {col}",
+                xaxis_title=col,
+                yaxis_title="Count",
+                yaxis2=dict(
+                    title="Percentage (%)",
+                    overlaying="y",
+                    side="right",
+                    range=[0, max(percentages) * 1.1]
+                ),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                height=500,
+                width=800,
+                xaxis_tickangle=-45
+            )
+            
+            bar_charts[col] = plotly_to_json(fig_bar)
+            
+            # Create pie chart for categorical distribution
+            fig_pie = px.pie(
+                values=value_counts.values,
+                names=value_counts.index,
+                title=f"Proportion of Categories in {col}",
+                hole=0.4,  # Create a donut chart
+                color_discrete_sequence=px.colors.qualitative.Pastel
+            )
+            
+            fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+            fig_pie.update_layout(
+                height=500,
+                width=500,
+                showlegend=False if len(value_counts) > 10 else True
+            )
+            
+            pie_charts[col] = plotly_to_json(fig_pie)
+            
+            # Calculate comprehensive distribution statistics
             cat_distributions[col] = {
-                "unique_values": len(value_counts),
-                "most_common": value_counts.index[0] if len(value_counts) > 0 else None,
+                "unique_values": int(len(value_counts)),
+                "most_common": str(value_counts.index[0]) if len(value_counts) > 0 else None,
                 "most_common_count": int(value_counts.iloc[0]) if len(value_counts) > 0 else 0,
-                "least_common": value_counts.index[-1] if len(value_counts) > 0 else None,
-                "least_common_count": int(value_counts.iloc[-1]) if len(value_counts) > 0 else 0
+                "most_common_percentage": float(percentages[0]) if len(percentages) > 0 else 0,
+                "entropy": float(stats.entropy(value_counts.values)) if len(value_counts) > 1 else 0,
+                "top_5_categories": [str(x) for x in value_counts.index[:5].tolist()],
+                "top_5_counts": [int(x) for x in value_counts.values[:5].tolist()]
             }
     
     return {
         "plots": {
             "histograms": histograms,
-            "bar_charts": bar_charts
+            "bar_charts": bar_charts,
+            "pie_charts": pie_charts
         },
         "stats": {
             "numerical_distributions": distributions,
@@ -619,32 +1166,120 @@ async def generate_distribution_analysis(df) -> dict:
     }
 
 async def generate_correlation_analysis(df) -> dict:
-    """Generate correlation analysis for numerical columns"""
-    # Get numerical columns
-    num_cols = df.select_dtypes(include=np.number).columns.tolist()
+    """Generate correlation matrix for numerical columns with outlier handling"""
+    if df.empty:
+        return {"error": "Dataset is empty"}
     
-    if len(num_cols) < 2:
-        return {"error": "Need at least 2 numerical columns for correlation analysis"}
-    
-    # Calculate correlation matrix
+    # Create a sample for visualization
     if isinstance(df, dd.DataFrame):
-        sample_df = df.head(10000)
-        corr_matrix = sample_df[num_cols].corr().compute()
+        sample_df = df.head(1000)
     else:
-        sample_size = min(10000, len(df))
+        # Handle case where dataset has fewer than 1000 rows
+        sample_size = min(1000, len(df))
         sample_df = df.sample(n=sample_size) if sample_size > 0 else df
-        corr_matrix = sample_df[num_cols].corr()
     
-    # Create heatmap
+    # Select only numeric columns
+    num_df = df.select_dtypes(include=['number'])
+    
+    if num_df.empty or num_df.shape[1] < 2:
+        return {"error": "Not enough numerical columns for correlation analysis"}
+    
+    # Create a copy for outlier handling
+    df_filtered = num_df.copy()
+    
+    # Handle outliers for better correlation calculation
+    for col in df_filtered.columns:
+        # Calculate IQR and outlier boundaries
+        q1 = df_filtered[col].quantile(0.25)
+        q3 = df_filtered[col].quantile(0.75)
+        iqr = q3 - q1
+        
+        if iqr > 0:  # Avoid division by zero or very small IQR
+            lower_bound = q1 - 3 * iqr
+            upper_bound = q3 + 3 * iqr
+            
+            # Replace outliers with boundary values for correlation calculation
+            df_filtered[col] = df_filtered[col].clip(lower=lower_bound, upper=upper_bound)
+    
+    # Calculate correlation matrix on filtered data
+    if isinstance(df, dd.DataFrame):
+        # For Dask DataFrames, compute first
+        df_filtered_computed = df_filtered.compute()
+        corr_matrix = df_filtered_computed.corr()
+    else:
+        corr_matrix = df_filtered.corr()
+    
+    # Also calculate correlation on original data for comparison
+    if isinstance(df, dd.DataFrame):
+        orig_corr_matrix = num_df.corr().compute()
+    else:
+        orig_corr_matrix = num_df.corr()
+    
+    # Convert to JSON-serializable format
+    corr_data = {}
+    for col1 in corr_matrix.columns:
+        corr_data[col1] = {}
+        for col2 in corr_matrix.columns:
+            # Store both the filtered and original correlation values
+            filtered_corr = float(corr_matrix.loc[col1, col2])
+            orig_corr = float(orig_corr_matrix.loc[col1, col2])
+            
+            corr_data[col1][col2] = {
+                'filtered': filtered_corr,
+                'original': orig_corr,
+                'difference': abs(filtered_corr - orig_corr)
+            }
+    
+    # Create heatmap using the outlier-filtered correlation
     fig = px.imshow(
         corr_matrix,
-        text_auto=True,
-        aspect="auto",
-        color_continuous_scale="RdBu_r",
-        title="Correlation Heatmap"
+        text_auto='.2f',  # Format to 2 decimal places
+        color_continuous_scale='Viridis',
+        title="Correlation Matrix (Outlier-Adjusted)"
     )
     
-    # Find strongest correlations
+    # Add annotations to highlight significant differences
+    annotations = []
+    for i, col1 in enumerate(corr_matrix.columns):
+        for j, col2 in enumerate(corr_matrix.columns):
+            if i != j:  # Skip diagonal
+                filtered_corr = corr_data[col1][col2]['filtered']
+                orig_corr = corr_data[col1][col2]['original']
+                diff = abs(filtered_corr - orig_corr)
+                
+                # If there's a significant difference, add a marker
+                if diff > 0.2:  # Threshold for significant difference
+                    annotations.append(dict(
+                        x=j,
+                        y=i,
+                        text="*",
+                        showarrow=False,
+                        font=dict(color="white", size=16)
+                    ))
+    
+    fig.update_layout(
+        height=600,
+        width=700,
+        margin=dict(l=60, r=50, t=50, b=50),
+        annotations=annotations
+    )
+    
+    # Create a comparison heatmap showing the difference
+    diff_matrix = abs(corr_matrix - orig_corr_matrix)
+    fig_diff = px.imshow(
+        diff_matrix,
+        text_auto='.2f',
+        color_continuous_scale='Reds',
+        title="Correlation Difference (Original vs. Outlier-Adjusted)"
+    )
+    
+    fig_diff.update_layout(
+        height=600,
+        width=700,
+        margin=dict(l=60, r=50, t=50, b=50)
+    )
+    
+    # Find strongest correlations (using filtered data)
     corr_values = corr_matrix.unstack()
     # Remove self-correlations
     corr_values = corr_values[corr_values < 1.0]
@@ -688,16 +1323,16 @@ async def generate_summary_statistics(df) -> dict:
         # Basic statistics
         if isinstance(df, dd.DataFrame):
             sample_df = df.head(10000)
-            num_rows = df.shape[0].compute()
-            num_cols = df.shape[1]
-            missing_values = df.isnull().sum().sum().compute()
-            duplicate_rows = df.duplicated().sum().compute()
+            num_rows = int(df.shape[0].compute())
+            num_cols = int(df.shape[1])
+            missing_values = int(df.isnull().sum().sum().compute())
+            duplicate_rows = int(df.duplicated().sum().compute())
         else:
             sample_df = df
-            num_rows = len(df)
-            num_cols = len(df.columns)
-            missing_values = df.isnull().sum().sum()
-            duplicate_rows = df.duplicated().sum()
+            num_rows = int(len(df))
+            num_cols = int(len(df.columns))
+            missing_values = int(df.isnull().sum().sum())
+            duplicate_rows = int(df.duplicated().sum())
         
         # Get numerical and categorical columns
         num_cols = sample_df.select_dtypes(include=np.number).columns.tolist()

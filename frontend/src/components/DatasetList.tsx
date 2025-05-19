@@ -82,8 +82,8 @@ export const DatasetList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-4">Upload New Dataset</h2>
+      <div className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-6">
+        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Upload New Dataset</h2>
         <FileUpload
           onUploadComplete={handleUploadComplete}
           onUploadStart={handleUploadStart}
@@ -92,18 +92,18 @@ export const DatasetList: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md">
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-md">
           {error}
         </div>
       )}
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Your Datasets</h2>
+      <div className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg overflow-hidden">
+        <div className="p-6 text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold mb-4">Datasets</h2>
           {datasets.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
+            <div className="overflow-x-auto text-gray-900 dark:text-white">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
@@ -119,10 +119,10 @@ export const DatasetList: React.FC = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {datasets.map((dataset) => (
                     <tr key={dataset.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                         {dataset.filename}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -133,20 +133,24 @@ export const DatasetList: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center space-x-2">
-                          <Link
-                            to={`/dashboard/diagnosis/${dataset.id}`}
-                            className="p-2 text-gray-400 hover:text-primary-500"
-                            title="Analyze Dataset"
-                          >
-                            <FaSpinner className="w-5 h-5" />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(dataset.id)}
-                            className="p-2 text-gray-400 hover:text-red-500"
-                            title="Delete Dataset"
-                          >
-                            <FaSpinner className="w-5 h-5" />
-                          </button>
+                          <div className="flex items-center space-x-2">
+                            <Link
+                              to={`/dashboard/diagnosis/${dataset.id}`}
+                              className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
+                              title="Analyze Dataset"
+                            >
+                              <FaSpinner className="w-4 h-4 mr-1" />
+                              Analyze
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(dataset.id)}
+                              className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                              title="Delete Dataset"
+                            >
+                              <FaSpinner className="w-4 h-4 mr-1" />
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -155,7 +159,7 @@ export const DatasetList: React.FC = () => {
               </table>
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4">
+            <p className="text-gray-500 dark:text-gray-400 text-center py-4">
               No datasets uploaded yet.
             </p>
           )}

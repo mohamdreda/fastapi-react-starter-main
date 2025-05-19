@@ -6,6 +6,7 @@ from app.db.models import Dataset
 from app.utils.logger import setup_logger
 from typing import Dict, Any
 from datetime import datetime
+from app.services.data_quality import DataQualityAnalyzer
 
 logger = setup_logger(__name__)
 
@@ -28,12 +29,23 @@ async def process_uploaded_file(db: AsyncSession, file_path: str, user_id: int, 
         # Read the file based on its type
         df = read_dataframe(file_path, file_type)
         
-        # Calculate statistics
-        dataset.missing_values = json.dumps(analyze_missing_values(df))
-        dataset.duplicates = df.duplicated().sum()
-        dataset.data_types = json.dumps(get_data_types(df))
-        dataset.categorical_issues = json.dumps(find_categorical_issues(df))
+        # Use the new DataQualityAnalyzer for comprehensive analysis
+        analyzer = DataQualityAnalyzer(df)
+        analysis_results = analyzer.get_full_analysis()
+        
+        # Save analysis results to the dataset
+        dataset.missing_values = json.dumps(analysis_results['missing_values'])
+        dataset.duplicates = analysis_results['duplicates']['duplicate_count']
+        dataset.data_types = json.dumps(analysis_results['data_types']['column_types'])
+        dataset.categorical_issues = json.dumps(analysis_results['categorical_consistency'])
         dataset.summary_stats = json.dumps(get_summary_stats(df))
+        
+        # Save additional metadata
+        dataset.analysis_metadata = json.dumps({
+            'id_columns': analysis_results['id_columns'],
+            'duplicate_details': analysis_results['duplicates'],
+            'type_issues': analysis_results['data_types']['type_issues']
+        })
         
         # Save to database
         db.add(dataset)
@@ -68,52 +80,19 @@ def read_dataframe(file_path: Path, file_type: str) -> pd.DataFrame:
         raise
 
 def analyze_missing_values(df: pd.DataFrame) -> Dict[str, Any]:
-    """Analyze missing values in the dataset"""
-    total_missing = df.isna().sum().sum()
-    total_cells = df.size
-    missing_percentage = (total_missing / total_cells) * 100 if total_cells > 0 else 0
-    
-    per_column = {
-        col: {
-            'count': int(missing),
-            'percentage': float(missing / len(df) * 100)
-        }
-        for col, missing in df.isna().sum().items()
-        if missing > 0
-    }
-    
-    return {
-        'total_missing': int(total_missing),
-        'missing_percentage': float(missing_percentage),
-        'per_column': per_column
-    }
+    """Legacy function - use DataQualityAnalyzer instead"""
+    analyzer = DataQualityAnalyzer(df)
+    return analyzer.analyze_missing_values()
 
 def get_data_types(df: pd.DataFrame) -> Dict[str, str]:
-    """Get data types for each column"""
-    return {col: str(dtype) for col, dtype in df.dtypes.items()}
+    """Legacy function - use DataQualityAnalyzer instead"""
+    analyzer = DataQualityAnalyzer(df)
+    return analyzer.analyze_data_types()['column_types']
 
 def find_categorical_issues(df: pd.DataFrame) -> Dict[str, Any]:
-    """Find potential issues in categorical columns"""
-    issues = {}
-    
-    for col in df.select_dtypes(include=['object', 'category']):
-        # Check for inconsistent capitalization or spacing
-        values = df[col].dropna().astype(str)
-        cleaned_values = values.str.strip().str.lower()
-        if not (values == cleaned_values).all():
-            issues[col] = {
-                'inconsistent_format': list(set(values[values != cleaned_values]))
-            }
-            
-        # Check for possible typos (very rare values)
-        value_counts = df[col].value_counts()
-        rare_values = value_counts[value_counts == 1].index.tolist()
-        if rare_values:
-            if col not in issues:
-                issues[col] = {}
-            issues[col]['rare_values'] = rare_values[:10]  # Limit to top 10
-            
-    return issues
+    """Legacy function - use DataQualityAnalyzer instead"""
+    analyzer = DataQualityAnalyzer(df)
+    return analyzer.analyze_categorical_consistency()
 
 def get_summary_stats(df: pd.DataFrame) -> Dict[str, Any]:
     """Get summary statistics for numerical columns"""

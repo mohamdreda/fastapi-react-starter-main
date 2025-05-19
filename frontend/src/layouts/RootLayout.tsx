@@ -5,10 +5,7 @@ import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import { Button } from '../components/ui/Button'
 
-const publicNavLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/about', label: 'About' },
-] as const
+const publicNavLinks = [] as const
 
 // Dashboard link will be dynamically generated based on user role
 
@@ -69,12 +66,14 @@ export default function RootLayout() {
 
   return (
     <AppProvider>
-      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
+      <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
         <Navigation />
-        <main className="flex-1 container mx-auto px-6 py-8">
+        <div className="flex-1 overflow-auto">
+        <main className="w-full h-full p-6">
           <Outlet />
         </main>
-        <footer className="bg-white dark:bg-gray-800 shadow-sm transition-colors mt-auto">
+      </div>
+      <footer className="bg-white dark:bg-gray-800 shadow-sm transition-colors">
           <div className="container mx-auto px-6 py-4">
             <p className="text-center text-gray-500 dark:text-gray-400">
               {currentYear} FastAPI React Starter. All rights reserved.

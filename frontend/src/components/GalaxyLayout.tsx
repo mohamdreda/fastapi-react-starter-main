@@ -35,6 +35,13 @@ const createTools = (userId: string): Tool[] => [
     description: 'Analyze data quality and statistics'
   },
   {
+    id: 'outliers',
+    name: 'Outliers',
+    icon: <FaChartBar />,
+    path: `/user/dashboard/${userId}/outliers`,
+    description: 'Identify and handle outliers'
+  },
+  {
     id: 'imputation',
     name: 'Missing Values',
     icon: <FaExclamationTriangle />,
@@ -47,13 +54,6 @@ const createTools = (userId: string): Tool[] => [
     icon: <FaRandom />,
     path: `/user/dashboard/${userId}/duplicates`,
     description: 'Detect and remove duplicate records'
-  },
-  {
-    id: 'outliers',
-    name: 'Outliers',
-    icon: <FaChartBar />,
-    path: `/user/dashboard/${userId}/outliers`,
-    description: 'Identify and handle outliers'
   },
   {
     id: 'export',
@@ -84,32 +84,36 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({ children }) => {
     <div className="flex h-screen bg-gray-100">
       {/* Left Sidebar - Tool Navigation */}
       <div className="w-64 bg-white shadow-lg">
-        <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold">Tools</h2>
-        </div>
-        <nav className="space-y-1 p-2">
-          {tools.map((tool) => {
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-semibold"> </h2>
+          </div>
+        <nav className="p-2">
+          {tools.map((tool, index) => {
             const isActive = location.pathname.includes(tool.id);
             return (
-              <Link
-                key={tool.id}
-                to={tool.path}
-                className={`flex items-center space-x-3 px-3 py-3 rounded-md transition-colors ${isActive
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-              >
-                <span className={`text-lg ${isActive ? 'text-primary-500' : 'text-gray-400'}`}>
-                  {tool.icon}
-                </span>
-                <div className="flex-1">
-                  <div className="text-sm font-medium">{tool.name}</div>
-                  <div className="text-xs text-gray-500">{tool.description}</div>
-                </div>
-                {isActive && (
-                  <div className="w-1.5 h-8 bg-primary-500 rounded-full ml-2"></div>
+              <React.Fragment key={tool.id}>
+                {index > 0 && (
+                  <div className="border-b border-gray-200 my-2" />
                 )}
-              </Link>
+                <Link
+                  to={tool.path}
+                  className={`flex items-center space-x-3 px-3 py-3 rounded-md transition-colors ${isActive
+                    ? 'bg-primary-50 text-primary-600'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                >
+                  <span className={`text-lg ${isActive ? 'text-primary-500' : 'text-gray-400'}`}>
+                    {tool.icon}
+                  </span>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{tool.name}</div>
+                    <div className="text-xs text-gray-500">{tool.description}</div>
+                  </div>
+                  {isActive && (
+                    <div className="w-1.5 h-8 bg-primary-500 rounded-full ml-2"></div>
+                  )}
+                </Link>
+              </React.Fragment>
             );
           })}
         </nav>
