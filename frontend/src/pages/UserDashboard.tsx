@@ -5,7 +5,6 @@ import { GalaxyLayout } from '@/components/GalaxyLayout';
 import { WelcomeDashboard } from '@/components/WelcomeDashboard';
 import { DatasetManager } from '@/pages/DatasetManager';
 import { DiagnosisDashboard } from '@/components/DataDiagnosis/DiagnosisDashboard';
-<hr style="border: none; border-top: 4px double black;" />
 
 // Placeholder components for other tools
 const Imputation = () => (
@@ -14,7 +13,6 @@ const Imputation = () => (
     <p>Select a dataset to start handling missing values.</p>
   </div>
 );
-<hr style="border: none; border-top: 4px double black;" />
 
 const Duplicates = () => (
   <div className="p-6">
@@ -23,16 +21,12 @@ const Duplicates = () => (
   </div>
 );
 
-<hr style="border: none; border-top: 4px double black;" />
-
-
 const Outliers = () => (
   <div className="p-6">
     <h1 className="text-2xl font-bold mb-4">Outliers Detection</h1>
     <p>Select a dataset to identify and handle outliers.</p>
   </div>
 );
-<hr style="border: none; border-top: 4px double black;" />
 
 const Export = () => (
   <div className="p-6">
@@ -40,7 +34,6 @@ const Export = () => (
     <p>Select a dataset to export after cleaning.</p>
   </div>
 );
-<hr style="border: none; border-top: 4px double black;" />
 
 const Settings = () => (
   <div className="p-6">

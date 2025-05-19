@@ -102,5 +102,5 @@ temp/
 *.key
 *.crt
 *.cert
-/uploads/ 
-/backend/uploads/ 
+"uploads/2/20250502_111713_large_data.csv" 
+/uploads/

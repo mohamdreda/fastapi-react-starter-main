@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import ConfirmationDialog from '@/components/ui/ConfirmationDialog';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -83,11 +84,19 @@ export const DatasetManager: React.FC = () => {
     setUploading(false);
   };
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedDatasetId, setSelectedDatasetId] = useState<number | null>(null);
+
   const handleDelete = async (datasetId: number) => {
-    if (!window.confirm('Are you sure you want to delete this dataset?')) return;
+    setSelectedDatasetId(datasetId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedDatasetId) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/datasets/${datasetId}`, {
+      const response = await fetch(`${API_URL}/api/v1/datasets/${selectedDatasetId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -99,9 +108,13 @@ export const DatasetManager: React.FC = () => {
         throw new Error(error.detail || 'Failed to delete dataset');
       }
 
-      setDatasets(datasets.filter(d => d.id !== datasetId));
+      setDatasets(datasets.filter(d => d.id !== selectedDatasetId));
+      setDeleteDialogOpen(false);
+      setSelectedDatasetId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete dataset');
+      setDeleteDialogOpen(false);
+      setSelectedDatasetId(null);
     }
   };
 
@@ -190,6 +203,16 @@ export const DatasetManager: React.FC = () => {
           </div>
         )}
       </div>
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setSelectedDatasetId(null);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 };
+
+export default DatasetManager;

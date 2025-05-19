@@ -53,10 +53,21 @@ async def upload_file(
         user_dir = UPLOAD_DIR / str(current_user.id)
         user_dir.mkdir(exist_ok=True)
         
-        # Save file with timestamp to avoid duplicates
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        safe_filename = f"{timestamp}_{file.filename}"
-        file_path = user_dir / safe_filename
+        # Save file with original filename
+        file_path = user_dir / file.filename
+        
+        # If file already exists, add a number suffix
+        counter = 1
+        original_path = file_path
+        while file_path.exists():
+            filename_parts = file.filename.rsplit('.', 1)
+            if len(filename_parts) == 1:
+                # No extension
+                file_path = user_dir / f"{filename_parts[0]}_{counter}"
+            else:
+                # Has extension
+                file_path = user_dir / f"{filename_parts[0]}_{counter}.{filename_parts[1]}"
+            counter += 1
         
         with file_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)

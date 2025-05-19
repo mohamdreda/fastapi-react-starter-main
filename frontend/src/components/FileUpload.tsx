@@ -31,8 +31,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
 
     const formData = new FormData();
-    formData.append('file', file);
+    // Use the original filename
+    formData.append('file', file, file.name);
     formData.append('file_type', fileType);
+    formData.append('original_filename', file.name); // Send the original filename explicitly
 
     setUploading(true);
     onUploadStart();
