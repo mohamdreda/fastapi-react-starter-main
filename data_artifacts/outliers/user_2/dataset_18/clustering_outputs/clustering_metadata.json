@@ -1,0 +1,23 @@
+{
+    "algorithm": "DBSCAN",
+    "params_input": {
+        "eps": 10.0,
+        "min_samples": 2,
+        "metric": "euclidean"
+    },
+    "input_features_shape": [
+        569,
+        10
+    ],
+    "scaled_features_shape": [
+        569,
+        10
+    ],
+    "num_clusters_found": 1,
+    "num_noise_points": 0,
+    "artifacts": {
+        "labels_path": "data_artifacts\\outliers\\user_2\\dataset_18\\clustering_outputs\\cluster_labels.parquet",
+        "metadata_path": "data_artifacts\\outliers\\user_2\\dataset_18\\clustering_outputs\\clustering_metadata.json",
+        "latent_features_scaler_path": "data_artifacts\\outliers\\user_2\\dataset_18\\clustering_outputs\\latent_features_scaler.joblib"
+    }
+}

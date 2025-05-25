@@ -1,0 +1,31 @@
+id,age,salary,country,join_date,department,rating,email,notes,active
+1,25,50000,USA,2023-01-15,IT,7,john@example.com,"Regular employee",TRUE
+2,30,60000,Canada,2023-02-20,Sales,8,sarah@example.com,"Top performer",TRUE
+3,,75000,France,2023-03-10,IT,6,pierre@example.com,"Promoted",FALSE
+4,45,,Germany,2023-04-25,HR,9,,NULL,TRUE
+5,25,50000,USA,2023-01-15,IT,7,john@example.com,"Regular employee",TRUE
+6,-50,1200000,Morocco,2050-05-30,Finance,10,ali@example.com,"Outlier",TRUE
+7,35,55000,us,2023-06-05,Sales,5,mary@example.com,"  Needs training ",TRUE
+8,28,48000,Spain,2023-07-12,IT,7,jose@example.com,"New hire",TRUE
+9,60,95000,Italy,2023-08-18,HR,12,luca@example.com,"Invalid rating",TRUE
+10,22,30000,Morocco,2023-09-23,Sales,4,anna@example.com,"Intern",FALSE
+11,40,,Canada,2023-10-30,Sales,9,bob@example.com,"Left company",NULL
+12,30,60000,Canada,2023-02-20,Sales,8,sarah@example.com,"Top performer",TRUE
+13,70,200000,Moon,2023-11-05,R&D,15,invalid_email,"Rare country",TRUE
+14,25,50000,USA,2023-01-15,IT,7,john@example.com,"Regular employee",TRUE
+15,NaN,85000,Japan,2023-12-10,Finance,invalid_rating,,NULL,TRUE
+16,25,50000,USA,2023-01-15,IT,7,john@example.com,"Regular employee",TRUE
+17,30,60000,Canada,2023-02-20,Sales,8,sarah@example.com,"Top performer",TRUE
+18,0,0,Invalid,2022-13-01,IT,-5,,NULL,FALSE
+19,999,9999999,USA,2023-01-01,CEO,999,ceo@example.com,"CEO salary",TRUE
+20,20,30000,mexico,2023-01-01,Intern,3,intern@example.com,"Intern",FALSE
+21,25,50000,USA,2023-01-15,IT,7,john@example.com,"Regular employee",TRUE
+22,35,55000,US,2023-06-05,Sales,5,mary@example.com,"Needs training",TRUE
+23,28,48000,Spain,2023-07-12,IT,7,jose@example.com,"New hire",TRUE
+24,60,95000,Italy,2023-08-18,HR,12,luca@example.com,"Invalid rating",TRUE
+25,22,30000,Morocco,2023-09-23,Sales,4,anna@example.com,"Intern",FALSE
+26,40,,Canada,2023-10-30,Sales,9,bob@example.com,"Left company",NULL
+27,30,60000,Canada,2023-02-20,Sales,8,sarah@example.com,"Top performer",TRUE
+28,70,200000,Moon,2023-11-05,R&D,15,invalid_email,"Rare country",TRUE
+29,25,50000,USA,2023-01-15,IT,7,john@example.com,"Regular employee",TRUE
+30,NaN,85000,Japan,2023-12-10,Finance,invalid_rating,,NULL,TRUE

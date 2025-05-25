@@ -1,0 +1,16 @@
+id_col,feature1,feature2,feature3,categorical_col,text_col
+1,1.0,2.1,3.0,A,Some text
+2,1.1,2.0,3.1,B,Another example
+3,0.9,2.2,2.9,A,More data
+4,1.2,1.9,3.2,C,Sample entry
+5,0.8,2.3,2.8,B,Test value
+6,10.0,15.0,12.0,A,OUTLIER_1_XYZ
+7,1.0,2.1,3.1,C,Normal again
+8,0.9,2.0,2.9,A,Keep going
+9,1.1,2.2,3.0,B,Almost there
+10,-5.0,-8.0,20.0,C,OUTLIER_2_ABC
+11,1.2,1.8,3.3,A,Last normal
+12,1.0,2.0,3.0,B,Standard
+13,0.95,2.05,2.95,A,Typical
+14,1.05,1.95,3.05,C,Common
+15,1.15,2.15,3.15,B,Usual

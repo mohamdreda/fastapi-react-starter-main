@@ -1,0 +1,3997 @@
+{
+    "pipeline_start_time": "2025-05-25T16:47:25.866186",
+    "current_step_status": "completed",
+    "total_points_processed": 569,
+    "num_numerical_features_used": 30,
+    "num_clusters_found": 1,
+    "num_noise_points": 0,
+    "total_outliers_detected": 199,
+    "outlier_results_list": [
+        {
+            "original_index": 0,
+            "is_outlier": true,
+            "if_score": -0.03662681967239717,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.014505718937964427
+        },
+        {
+            "original_index": 1,
+            "is_outlier": true,
+            "if_score": -0.015714648836537726,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019204723276401816
+        },
+        {
+            "original_index": 2,
+            "is_outlier": false,
+            "if_score": 0.05616958011283246,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021793365441177366
+        },
+        {
+            "original_index": 3,
+            "is_outlier": true,
+            "if_score": -0.09425338394875465,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.035229960070631464
+        },
+        {
+            "original_index": 4,
+            "is_outlier": true,
+            "if_score": -0.001047809205120931,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004285597273645793
+        },
+        {
+            "original_index": 5,
+            "is_outlier": false,
+            "if_score": 0.02429925320482862,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004008741686111109
+        },
+        {
+            "original_index": 6,
+            "is_outlier": false,
+            "if_score": 0.036143880698555675,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0005772926569900573
+        },
+        {
+            "original_index": 7,
+            "is_outlier": false,
+            "if_score": 0.011592360863133977,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004290112303792471
+        },
+        {
+            "original_index": 8,
+            "is_outlier": false,
+            "if_score": 0.01991907043879043,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029572313423033413
+        },
+        {
+            "original_index": 9,
+            "is_outlier": true,
+            "if_score": -0.08836475713159336,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.025470752229718476
+        },
+        {
+            "original_index": 10,
+            "is_outlier": true,
+            "if_score": -0.024108246630973773,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011976147881760353
+        },
+        {
+            "original_index": 11,
+            "is_outlier": false,
+            "if_score": 0.06535198781141127,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003296533702999408
+        },
+        {
+            "original_index": 12,
+            "is_outlier": true,
+            "if_score": -0.10896973638600765,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.023774528050681955
+        },
+        {
+            "original_index": 13,
+            "is_outlier": false,
+            "if_score": 5.845970412310386e-05,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003784574744847749
+        },
+        {
+            "original_index": 14,
+            "is_outlier": true,
+            "if_score": -0.022695317417305738,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0031764058884533085
+        },
+        {
+            "original_index": 15,
+            "is_outlier": false,
+            "if_score": 0.010697653177336064,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004589199537563202
+        },
+        {
+            "original_index": 16,
+            "is_outlier": false,
+            "if_score": 0.04267551899930189,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002405769200343214
+        },
+        {
+            "original_index": 17,
+            "is_outlier": false,
+            "if_score": 0.039042875902872254,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002758325215974313
+        },
+        {
+            "original_index": 18,
+            "is_outlier": false,
+            "if_score": 0.003559012310395848,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0034981659990280236
+        },
+        {
+            "original_index": 19,
+            "is_outlier": false,
+            "if_score": 0.05935800366611754,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001749137439927447
+        },
+        {
+            "original_index": 20,
+            "is_outlier": false,
+            "if_score": 0.05713032166768567,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024521663752814517
+        },
+        {
+            "original_index": 21,
+            "is_outlier": true,
+            "if_score": -0.009384584755615044,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016225977174009253
+        },
+        {
+            "original_index": 22,
+            "is_outlier": false,
+            "if_score": 0.003958713139470271,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008343683896177376
+        },
+        {
+            "original_index": 23,
+            "is_outlier": true,
+            "if_score": -0.04609591693799836,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029678569135881258
+        },
+        {
+            "original_index": 24,
+            "is_outlier": false,
+            "if_score": 0.04602243860687527,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005370388881902168
+        },
+        {
+            "original_index": 25,
+            "is_outlier": true,
+            "if_score": -0.006918283403161307,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.014178354935550003
+        },
+        {
+            "original_index": 26,
+            "is_outlier": false,
+            "if_score": 0.01839811411500797,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004402050641236078
+        },
+        {
+            "original_index": 27,
+            "is_outlier": false,
+            "if_score": 0.015154846821505252,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023199775752949297
+        },
+        {
+            "original_index": 28,
+            "is_outlier": false,
+            "if_score": 0.025948398941380735,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0026487086574785335
+        },
+        {
+            "original_index": 29,
+            "is_outlier": false,
+            "if_score": 0.05018217131900271,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015807148991018062
+        },
+        {
+            "original_index": 30,
+            "is_outlier": false,
+            "if_score": 0.029236934170914997,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0030272752141775492
+        },
+        {
+            "original_index": 31,
+            "is_outlier": false,
+            "if_score": 0.025328153036554057,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006401095901346475
+        },
+        {
+            "original_index": 32,
+            "is_outlier": false,
+            "if_score": 0.06015164855250171,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0041659371527560975
+        },
+        {
+            "original_index": 33,
+            "is_outlier": false,
+            "if_score": 0.014640192717567946,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0052257254489983035
+        },
+        {
+            "original_index": 34,
+            "is_outlier": false,
+            "if_score": 0.049099689683771985,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0032413902967641027
+        },
+        {
+            "original_index": 35,
+            "is_outlier": false,
+            "if_score": 0.05730145946391302,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005163905742207832
+        },
+        {
+            "original_index": 36,
+            "is_outlier": false,
+            "if_score": 0.05289196586049011,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014606802748332785
+        },
+        {
+            "original_index": 37,
+            "is_outlier": true,
+            "if_score": -0.03345962965050109,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004270124997632552
+        },
+        {
+            "original_index": 38,
+            "is_outlier": true,
+            "if_score": -0.08514471501439674,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.013255864689221365
+        },
+        {
+            "original_index": 39,
+            "is_outlier": false,
+            "if_score": 0.04292887864364803,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0030166242712085342
+        },
+        {
+            "original_index": 40,
+            "is_outlier": false,
+            "if_score": 0.04155136464387982,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017484875537763932
+        },
+        {
+            "original_index": 41,
+            "is_outlier": false,
+            "if_score": 0.00021135136390326714,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0062139350999536516
+        },
+        {
+            "original_index": 42,
+            "is_outlier": true,
+            "if_score": -0.09889592041394296,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01732721220070648
+        },
+        {
+            "original_index": 43,
+            "is_outlier": false,
+            "if_score": 0.054770305225857185,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011365413837443803
+        },
+        {
+            "original_index": 44,
+            "is_outlier": false,
+            "if_score": 0.019100403027353052,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002130083983177245
+        },
+        {
+            "original_index": 45,
+            "is_outlier": false,
+            "if_score": 0.04994635034099554,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003604198131001303
+        },
+        {
+            "original_index": 46,
+            "is_outlier": true,
+            "if_score": -0.009550442935980508,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002203298671052248
+        },
+        {
+            "original_index": 47,
+            "is_outlier": false,
+            "if_score": 0.03597422293359337,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024263234085716034
+        },
+        {
+            "original_index": 48,
+            "is_outlier": false,
+            "if_score": 0.04729426165101963,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018414557659542144
+        },
+        {
+            "original_index": 49,
+            "is_outlier": false,
+            "if_score": 0.04317128110513857,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001275773189282127
+        },
+        {
+            "original_index": 50,
+            "is_outlier": false,
+            "if_score": 0.014995243109463818,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010430421204881324
+        },
+        {
+            "original_index": 51,
+            "is_outlier": false,
+            "if_score": 0.022487096063255163,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017930113787476708
+        },
+        {
+            "original_index": 52,
+            "is_outlier": false,
+            "if_score": 0.036331520008387186,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011932439200276444
+        },
+        {
+            "original_index": 53,
+            "is_outlier": false,
+            "if_score": 0.046614263158823555,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0059280952374901694
+        },
+        {
+            "original_index": 54,
+            "is_outlier": false,
+            "if_score": 0.031187838464743045,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001148612673199706
+        },
+        {
+            "original_index": 55,
+            "is_outlier": false,
+            "if_score": 0.03724708496616058,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024214419495936345
+        },
+        {
+            "original_index": 56,
+            "is_outlier": false,
+            "if_score": 0.04029217969484333,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002632538428761174
+        },
+        {
+            "original_index": 57,
+            "is_outlier": false,
+            "if_score": 0.05181412240169686,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018550509270970621
+        },
+        {
+            "original_index": 58,
+            "is_outlier": true,
+            "if_score": -0.03047604843980667,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018358349637206583
+        },
+        {
+            "original_index": 59,
+            "is_outlier": true,
+            "if_score": -0.07211658886318745,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0050163825231490915
+        },
+        {
+            "original_index": 60,
+            "is_outlier": true,
+            "if_score": -0.05229059162034139,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.011539965845729732
+        },
+        {
+            "original_index": 61,
+            "is_outlier": true,
+            "if_score": -0.037240073096659165,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005239187166762668
+        },
+        {
+            "original_index": 62,
+            "is_outlier": false,
+            "if_score": 0.016637436893623292,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004761143953018001
+        },
+        {
+            "original_index": 63,
+            "is_outlier": true,
+            "if_score": -0.04618142047520102,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007308081629845116
+        },
+        {
+            "original_index": 64,
+            "is_outlier": false,
+            "if_score": 0.03369705686504354,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024051601054681554
+        },
+        {
+            "original_index": 65,
+            "is_outlier": false,
+            "if_score": 0.027163468275561042,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002456613439814233
+        },
+        {
+            "original_index": 66,
+            "is_outlier": true,
+            "if_score": -0.01187540485465427,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002589682835779469
+        },
+        {
+            "original_index": 67,
+            "is_outlier": false,
+            "if_score": 0.041985927678337254,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018805269215055604
+        },
+        {
+            "original_index": 68,
+            "is_outlier": true,
+            "if_score": -0.06937733172315458,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.028792285736569688
+        },
+        {
+            "original_index": 69,
+            "is_outlier": false,
+            "if_score": 0.038934689130113276,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001401848039552325
+        },
+        {
+            "original_index": 70,
+            "is_outlier": true,
+            "if_score": -0.00023383881649241545,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014991367318812074
+        },
+        {
+            "original_index": 71,
+            "is_outlier": true,
+            "if_score": -0.11951457622866019,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.020043505482743865
+        },
+        {
+            "original_index": 72,
+            "is_outlier": false,
+            "if_score": 0.032578788969544026,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006377167943692902
+        },
+        {
+            "original_index": 73,
+            "is_outlier": false,
+            "if_score": 0.05511492039494531,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017001490779370325
+        },
+        {
+            "original_index": 74,
+            "is_outlier": false,
+            "if_score": 0.06724223023425402,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0004530230659342244
+        },
+        {
+            "original_index": 75,
+            "is_outlier": false,
+            "if_score": 0.04397671699359612,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004038519455681974
+        },
+        {
+            "original_index": 76,
+            "is_outlier": true,
+            "if_score": 0.017756012417310896,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.011946807910631784
+        },
+        {
+            "original_index": 77,
+            "is_outlier": false,
+            "if_score": 0.01646776777281067,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007647540066638504
+        },
+        {
+            "original_index": 78,
+            "is_outlier": true,
+            "if_score": -0.07577558791605471,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.033261804450607765
+        },
+        {
+            "original_index": 79,
+            "is_outlier": false,
+            "if_score": 0.0664264020774008,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00038098201561874336
+        },
+        {
+            "original_index": 80,
+            "is_outlier": false,
+            "if_score": 0.013567927072404895,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0036535047849978702
+        },
+        {
+            "original_index": 81,
+            "is_outlier": false,
+            "if_score": 0.046468156405414573,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011224414183691896
+        },
+        {
+            "original_index": 82,
+            "is_outlier": true,
+            "if_score": -0.02864344828794274,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.010293421712649459
+        },
+        {
+            "original_index": 83,
+            "is_outlier": true,
+            "if_score": 0.0013467190260140205,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01552538518614112
+        },
+        {
+            "original_index": 84,
+            "is_outlier": false,
+            "if_score": 0.058836322388358675,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002436040465227904
+        },
+        {
+            "original_index": 85,
+            "is_outlier": false,
+            "if_score": 0.04567106876912164,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0031739947228779917
+        },
+        {
+            "original_index": 86,
+            "is_outlier": true,
+            "if_score": -0.0024493283544598232,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0032366737368300998
+        },
+        {
+            "original_index": 87,
+            "is_outlier": false,
+            "if_score": 0.037537472928058424,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0033755708097767947
+        },
+        {
+            "original_index": 88,
+            "is_outlier": false,
+            "if_score": 0.04925249730870723,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0008993384232811396
+        },
+        {
+            "original_index": 89,
+            "is_outlier": false,
+            "if_score": 0.04955545967807218,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0035283511544645773
+        },
+        {
+            "original_index": 90,
+            "is_outlier": false,
+            "if_score": 0.041905303861242416,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009970515307810325
+        },
+        {
+            "original_index": 91,
+            "is_outlier": false,
+            "if_score": 0.021020475894118817,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0033913888938140128
+        },
+        {
+            "original_index": 92,
+            "is_outlier": false,
+            "if_score": 0.0010700210572438529,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00295064952555707
+        },
+        {
+            "original_index": 93,
+            "is_outlier": false,
+            "if_score": 0.061224343209512255,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011163257823468052
+        },
+        {
+            "original_index": 94,
+            "is_outlier": false,
+            "if_score": 0.06537457352948539,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002782283591303036
+        },
+        {
+            "original_index": 95,
+            "is_outlier": false,
+            "if_score": 0.028178504748800737,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0028684508427001027
+        },
+        {
+            "original_index": 96,
+            "is_outlier": false,
+            "if_score": 0.03708837086729716,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0026687596636771637
+        },
+        {
+            "original_index": 97,
+            "is_outlier": true,
+            "if_score": -0.023750237719955047,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004971639944836583
+        },
+        {
+            "original_index": 98,
+            "is_outlier": false,
+            "if_score": 0.03127521440536313,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011416684115250115
+        },
+        {
+            "original_index": 99,
+            "is_outlier": false,
+            "if_score": 0.03800441742040095,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016642269440850495
+        },
+        {
+            "original_index": 100,
+            "is_outlier": false,
+            "if_score": 0.011865885861639447,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00136972744316059
+        },
+        {
+            "original_index": 101,
+            "is_outlier": true,
+            "if_score": -0.10740072373864235,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006117281550665833
+        },
+        {
+            "original_index": 102,
+            "is_outlier": true,
+            "if_score": -0.007140458241611858,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012337623724210244
+        },
+        {
+            "original_index": 103,
+            "is_outlier": false,
+            "if_score": 0.03641460222572285,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002678016554417003
+        },
+        {
+            "original_index": 104,
+            "is_outlier": false,
+            "if_score": 0.0053846988216118,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0020423569700026107
+        },
+        {
+            "original_index": 105,
+            "is_outlier": false,
+            "if_score": 0.010117786386537042,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007425888672427567
+        },
+        {
+            "original_index": 106,
+            "is_outlier": false,
+            "if_score": 0.03828578175070363,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002768183396896268
+        },
+        {
+            "original_index": 107,
+            "is_outlier": false,
+            "if_score": 0.04494654743377452,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014897993770615946
+        },
+        {
+            "original_index": 108,
+            "is_outlier": true,
+            "if_score": -0.06432426622738657,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.012113128602618869
+        },
+        {
+            "original_index": 109,
+            "is_outlier": false,
+            "if_score": 0.016750751836046796,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004301082219159329
+        },
+        {
+            "original_index": 110,
+            "is_outlier": false,
+            "if_score": 0.001130082950118294,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0022387325862459964
+        },
+        {
+            "original_index": 111,
+            "is_outlier": true,
+            "if_score": -0.02487665775260206,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0034469997237538868
+        },
+        {
+            "original_index": 112,
+            "is_outlier": true,
+            "if_score": -0.028329064009516847,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.018189572051260285
+        },
+        {
+            "original_index": 113,
+            "is_outlier": true,
+            "if_score": -0.0052132637502809165,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002416529629018146
+        },
+        {
+            "original_index": 114,
+            "is_outlier": true,
+            "if_score": -0.0026017338612639995,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0043647616674717445
+        },
+        {
+            "original_index": 115,
+            "is_outlier": false,
+            "if_score": 0.03624293288574043,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016629036299288444
+        },
+        {
+            "original_index": 116,
+            "is_outlier": true,
+            "if_score": -0.009046841382742754,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01546826208596098
+        },
+        {
+            "original_index": 117,
+            "is_outlier": false,
+            "if_score": 0.036221425555691134,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003233840805116477
+        },
+        {
+            "original_index": 118,
+            "is_outlier": false,
+            "if_score": 0.028388715069079973,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002786881528548178
+        },
+        {
+            "original_index": 119,
+            "is_outlier": true,
+            "if_score": 0.019227842147356955,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01590075753932511
+        },
+        {
+            "original_index": 120,
+            "is_outlier": false,
+            "if_score": 0.007164062868174503,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023750584453730342
+        },
+        {
+            "original_index": 121,
+            "is_outlier": false,
+            "if_score": 0.05676873386449127,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0026066487110177968
+        },
+        {
+            "original_index": 122,
+            "is_outlier": true,
+            "if_score": -0.17626630689556805,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.026997215446925897
+        },
+        {
+            "original_index": 123,
+            "is_outlier": false,
+            "if_score": 0.04372283046651021,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027741497127507075
+        },
+        {
+            "original_index": 124,
+            "is_outlier": false,
+            "if_score": 0.046100084735378244,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005497958957970493
+        },
+        {
+            "original_index": 125,
+            "is_outlier": false,
+            "if_score": 0.015348597721439927,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007565224538541907
+        },
+        {
+            "original_index": 126,
+            "is_outlier": true,
+            "if_score": -0.010407999034274529,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016066038595274233
+        },
+        {
+            "original_index": 127,
+            "is_outlier": true,
+            "if_score": -0.013289022176722898,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0020451249874049744
+        },
+        {
+            "original_index": 128,
+            "is_outlier": false,
+            "if_score": 0.03580430674213858,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005814998440457108
+        },
+        {
+            "original_index": 129,
+            "is_outlier": false,
+            "if_score": 0.04756847575334966,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004746939797868433
+        },
+        {
+            "original_index": 130,
+            "is_outlier": false,
+            "if_score": 0.03263906710425857,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002128337347358087
+        },
+        {
+            "original_index": 131,
+            "is_outlier": false,
+            "if_score": 0.06861950949975565,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0022180632638301003
+        },
+        {
+            "original_index": 132,
+            "is_outlier": false,
+            "if_score": 0.04945891748256809,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002330430247099497
+        },
+        {
+            "original_index": 133,
+            "is_outlier": false,
+            "if_score": 0.05149942148539444,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010466319390014115
+        },
+        {
+            "original_index": 134,
+            "is_outlier": false,
+            "if_score": 0.02793180094876635,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016633822981479058
+        },
+        {
+            "original_index": 135,
+            "is_outlier": false,
+            "if_score": 0.02402152958735143,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012400217456185604
+        },
+        {
+            "original_index": 136,
+            "is_outlier": false,
+            "if_score": 0.01120303212532947,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006834481632555909
+        },
+        {
+            "original_index": 137,
+            "is_outlier": false,
+            "if_score": 0.061562039698328186,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009128737095733736
+        },
+        {
+            "original_index": 138,
+            "is_outlier": true,
+            "if_score": -0.039507931815133235,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.012337605840748802
+        },
+        {
+            "original_index": 139,
+            "is_outlier": false,
+            "if_score": 0.03724728148340062,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006167953718780989
+        },
+        {
+            "original_index": 140,
+            "is_outlier": true,
+            "if_score": -0.07745901681571948,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003367856822648162
+        },
+        {
+            "original_index": 141,
+            "is_outlier": false,
+            "if_score": 0.03218970030025936,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001295618698372287
+        },
+        {
+            "original_index": 142,
+            "is_outlier": false,
+            "if_score": 0.04254553426859209,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0022554294220461925
+        },
+        {
+            "original_index": 143,
+            "is_outlier": false,
+            "if_score": 0.06063861114074631,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014539704879998393
+        },
+        {
+            "original_index": 144,
+            "is_outlier": false,
+            "if_score": 0.015846782086059497,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017281167688582308
+        },
+        {
+            "original_index": 145,
+            "is_outlier": false,
+            "if_score": 0.005597583688685792,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004562927085195761
+        },
+        {
+            "original_index": 146,
+            "is_outlier": true,
+            "if_score": -0.010720180684137715,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.02111880734365213
+        },
+        {
+            "original_index": 147,
+            "is_outlier": true,
+            "if_score": -0.017491515055386708,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004710332374925857
+        },
+        {
+            "original_index": 148,
+            "is_outlier": false,
+            "if_score": 0.06370266183142831,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001136923746293871
+        },
+        {
+            "original_index": 149,
+            "is_outlier": false,
+            "if_score": 0.027014812059922233,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0013775281036973789
+        },
+        {
+            "original_index": 150,
+            "is_outlier": false,
+            "if_score": 0.036961027513102485,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008565877744465995
+        },
+        {
+            "original_index": 151,
+            "is_outlier": true,
+            "if_score": -0.1077427117389878,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.010569826715571771
+        },
+        {
+            "original_index": 152,
+            "is_outlier": true,
+            "if_score": -0.20796125276945693,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.05730813199600842
+        },
+        {
+            "original_index": 153,
+            "is_outlier": true,
+            "if_score": -0.017646434859827864,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011783780013444967
+        },
+        {
+            "original_index": 154,
+            "is_outlier": false,
+            "if_score": 0.05680771274051244,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027748767584336023
+        },
+        {
+            "original_index": 155,
+            "is_outlier": false,
+            "if_score": 0.06251573481076594,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001114758782167783
+        },
+        {
+            "original_index": 156,
+            "is_outlier": false,
+            "if_score": 0.025187437093523057,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0033676545653785455
+        },
+        {
+            "original_index": 157,
+            "is_outlier": true,
+            "if_score": -0.03408876976622416,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003701143329327156
+        },
+        {
+            "original_index": 158,
+            "is_outlier": false,
+            "if_score": 0.013959756508453658,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0004490994114192404
+        },
+        {
+            "original_index": 159,
+            "is_outlier": true,
+            "if_score": -0.02327529263080924,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014146322752146751
+        },
+        {
+            "original_index": 160,
+            "is_outlier": true,
+            "if_score": -0.0005867551680323602,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019706800387019295
+        },
+        {
+            "original_index": 161,
+            "is_outlier": true,
+            "if_score": -0.006267991712095078,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008141021455114826
+        },
+        {
+            "original_index": 162,
+            "is_outlier": false,
+            "if_score": 0.02868187539673367,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002083475934391114
+        },
+        {
+            "original_index": 163,
+            "is_outlier": false,
+            "if_score": 0.015163254731396847,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023948440216062837
+        },
+        {
+            "original_index": 164,
+            "is_outlier": true,
+            "if_score": -0.03292001479780993,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004450962691106768
+        },
+        {
+            "original_index": 165,
+            "is_outlier": true,
+            "if_score": -0.013696719812573255,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007138653524266698
+        },
+        {
+            "original_index": 166,
+            "is_outlier": true,
+            "if_score": -0.07225914563614061,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003514682372527617
+        },
+        {
+            "original_index": 167,
+            "is_outlier": false,
+            "if_score": 0.03936294495096976,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011002549332810004
+        },
+        {
+            "original_index": 168,
+            "is_outlier": true,
+            "if_score": -0.015530210258353494,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007362401583092356
+        },
+        {
+            "original_index": 169,
+            "is_outlier": false,
+            "if_score": 0.045163704978426866,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014907122259092329
+        },
+        {
+            "original_index": 170,
+            "is_outlier": false,
+            "if_score": 0.021770819739897695,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002129092914509289
+        },
+        {
+            "original_index": 171,
+            "is_outlier": false,
+            "if_score": 0.047920733042434105,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016907925140025293
+        },
+        {
+            "original_index": 172,
+            "is_outlier": false,
+            "if_score": 0.045929624072926,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004904446516493012
+        },
+        {
+            "original_index": 173,
+            "is_outlier": true,
+            "if_score": -0.01648844730031057,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004329638349298829
+        },
+        {
+            "original_index": 174,
+            "is_outlier": true,
+            "if_score": -0.08277860769940676,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003047220159464089
+        },
+        {
+            "original_index": 175,
+            "is_outlier": true,
+            "if_score": -0.04581645440870857,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027640566464109963
+        },
+        {
+            "original_index": 176,
+            "is_outlier": true,
+            "if_score": -0.10549040085443778,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00757310168065271
+        },
+        {
+            "original_index": 177,
+            "is_outlier": false,
+            "if_score": 0.059122477373321436,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0022518906477826096
+        },
+        {
+            "original_index": 178,
+            "is_outlier": true,
+            "if_score": -0.12258922303726555,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021664549881820626
+        },
+        {
+            "original_index": 179,
+            "is_outlier": true,
+            "if_score": -0.03722927794852071,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002497758606538258
+        },
+        {
+            "original_index": 180,
+            "is_outlier": true,
+            "if_score": -0.08840704921414105,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006523178108365513
+        },
+        {
+            "original_index": 181,
+            "is_outlier": true,
+            "if_score": -0.04321874701394263,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008853388207594461
+        },
+        {
+            "original_index": 182,
+            "is_outlier": false,
+            "if_score": 0.02935423261479425,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017519319886307773
+        },
+        {
+            "original_index": 183,
+            "is_outlier": false,
+            "if_score": 0.02944047193006316,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006787450134090335
+        },
+        {
+            "original_index": 184,
+            "is_outlier": false,
+            "if_score": 0.026081647090874016,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023204284602282308
+        },
+        {
+            "original_index": 185,
+            "is_outlier": true,
+            "if_score": -0.031769053584136175,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004593354649681652
+        },
+        {
+            "original_index": 186,
+            "is_outlier": false,
+            "if_score": 0.014145912988999587,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001600842628322324
+        },
+        {
+            "original_index": 187,
+            "is_outlier": false,
+            "if_score": 0.0522038092770995,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015693301656768356
+        },
+        {
+            "original_index": 188,
+            "is_outlier": true,
+            "if_score": -0.0025252053457386903,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029739457581180657
+        },
+        {
+            "original_index": 189,
+            "is_outlier": false,
+            "if_score": 0.04479966619085585,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0013727446222779425
+        },
+        {
+            "original_index": 190,
+            "is_outlier": true,
+            "if_score": -0.07607945480008033,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.02585735052127564
+        },
+        {
+            "original_index": 191,
+            "is_outlier": false,
+            "if_score": 0.0028704979302537903,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005668905076226944
+        },
+        {
+            "original_index": 192,
+            "is_outlier": true,
+            "if_score": -0.22328068420080177,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.016876608204856813
+        },
+        {
+            "original_index": 193,
+            "is_outlier": true,
+            "if_score": -0.022888712473637607,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004577698547149468
+        },
+        {
+            "original_index": 194,
+            "is_outlier": false,
+            "if_score": 0.0480970444933721,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004753420783001593
+        },
+        {
+            "original_index": 195,
+            "is_outlier": false,
+            "if_score": 0.05417540289776962,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011952287350061052
+        },
+        {
+            "original_index": 196,
+            "is_outlier": true,
+            "if_score": -0.019375853651796282,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006183204713340462
+        },
+        {
+            "original_index": 197,
+            "is_outlier": true,
+            "if_score": -0.02866706340930869,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00554046084988329
+        },
+        {
+            "original_index": 198,
+            "is_outlier": false,
+            "if_score": 0.017696164484342747,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004174627496204101
+        },
+        {
+            "original_index": 199,
+            "is_outlier": false,
+            "if_score": 0.03943761263757617,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0032450502701649076
+        },
+        {
+            "original_index": 200,
+            "is_outlier": false,
+            "if_score": 0.05219510237311542,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015116559431498687
+        },
+        {
+            "original_index": 201,
+            "is_outlier": false,
+            "if_score": 0.05193759495961109,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019462956940969236
+        },
+        {
+            "original_index": 202,
+            "is_outlier": false,
+            "if_score": 0.005115838343427492,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008089232182670613
+        },
+        {
+            "original_index": 203,
+            "is_outlier": true,
+            "if_score": -0.014707745900829239,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.012385679337412994
+        },
+        {
+            "original_index": 204,
+            "is_outlier": false,
+            "if_score": 0.047057693869713646,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.000847421789203501
+        },
+        {
+            "original_index": 205,
+            "is_outlier": false,
+            "if_score": 0.04635410124455286,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023806011435381896
+        },
+        {
+            "original_index": 206,
+            "is_outlier": false,
+            "if_score": 0.014218870850088328,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018834720169319957
+        },
+        {
+            "original_index": 207,
+            "is_outlier": false,
+            "if_score": 0.027098617664481017,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024089238432192933
+        },
+        {
+            "original_index": 208,
+            "is_outlier": false,
+            "if_score": 0.024461344529211504,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004933122154427381
+        },
+        {
+            "original_index": 209,
+            "is_outlier": true,
+            "if_score": -0.019531835632212557,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021006287589110722
+        },
+        {
+            "original_index": 210,
+            "is_outlier": true,
+            "if_score": -0.016068776562758735,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0042030575582927615
+        },
+        {
+            "original_index": 211,
+            "is_outlier": false,
+            "if_score": 0.05643347318544456,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007191250070626691
+        },
+        {
+            "original_index": 212,
+            "is_outlier": true,
+            "if_score": -0.2333776421315144,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.02980700184317159
+        },
+        {
+            "original_index": 213,
+            "is_outlier": true,
+            "if_score": -0.11513518981254106,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.03758679108670828
+        },
+        {
+            "original_index": 214,
+            "is_outlier": true,
+            "if_score": -0.00703303338377731,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008454329391240082
+        },
+        {
+            "original_index": 215,
+            "is_outlier": false,
+            "if_score": 0.054567806823981546,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009983311652402359
+        },
+        {
+            "original_index": 216,
+            "is_outlier": false,
+            "if_score": 0.00598636422776605,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018111025677267347
+        },
+        {
+            "original_index": 217,
+            "is_outlier": false,
+            "if_score": 0.015520284121710859,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003795380748003709
+        },
+        {
+            "original_index": 218,
+            "is_outlier": false,
+            "if_score": 0.0281095162249278,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016746047465120756
+        },
+        {
+            "original_index": 219,
+            "is_outlier": true,
+            "if_score": -0.1366790177337262,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.009515335509339065
+        },
+        {
+            "original_index": 220,
+            "is_outlier": false,
+            "if_score": 0.006324827029571323,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002239510306073618
+        },
+        {
+            "original_index": 221,
+            "is_outlier": false,
+            "if_score": 0.05562850529400243,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016666954599913004
+        },
+        {
+            "original_index": 222,
+            "is_outlier": false,
+            "if_score": 0.015062596484157309,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011886322771644392
+        },
+        {
+            "original_index": 223,
+            "is_outlier": false,
+            "if_score": 0.04547059844700996,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015221707625269717
+        },
+        {
+            "original_index": 224,
+            "is_outlier": false,
+            "if_score": 0.051441409657372206,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0008696669184061657
+        },
+        {
+            "original_index": 225,
+            "is_outlier": false,
+            "if_score": 0.04820988252551106,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0038604458800235455
+        },
+        {
+            "original_index": 226,
+            "is_outlier": false,
+            "if_score": 0.01791949399890136,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00126661729155915
+        },
+        {
+            "original_index": 227,
+            "is_outlier": false,
+            "if_score": 0.06116335961620872,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002849825820951016
+        },
+        {
+            "original_index": 228,
+            "is_outlier": false,
+            "if_score": 0.025085701426493634,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0035104066221218434
+        },
+        {
+            "original_index": 229,
+            "is_outlier": false,
+            "if_score": 0.014197171636341877,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016004118204761442
+        },
+        {
+            "original_index": 230,
+            "is_outlier": false,
+            "if_score": 0.044429489665349486,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00327384809853695
+        },
+        {
+            "original_index": 231,
+            "is_outlier": true,
+            "if_score": -0.05373206765488209,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004464886930042973
+        },
+        {
+            "original_index": 232,
+            "is_outlier": true,
+            "if_score": -0.1485359729138644,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005830413901022932
+        },
+        {
+            "original_index": 233,
+            "is_outlier": true,
+            "if_score": -0.0494263603886535,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0035124062975060077
+        },
+        {
+            "original_index": 234,
+            "is_outlier": false,
+            "if_score": 0.0123398301222436,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0031601884346445924
+        },
+        {
+            "original_index": 235,
+            "is_outlier": false,
+            "if_score": 0.023706880290720045,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016539440071965687
+        },
+        {
+            "original_index": 236,
+            "is_outlier": true,
+            "if_score": -0.023758743037008367,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003806831467574374
+        },
+        {
+            "original_index": 237,
+            "is_outlier": true,
+            "if_score": -0.03835784912594559,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002780827565949877
+        },
+        {
+            "original_index": 238,
+            "is_outlier": true,
+            "if_score": -0.04659471999964698,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006661153350478228
+        },
+        {
+            "original_index": 239,
+            "is_outlier": true,
+            "if_score": -0.10315712122526782,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.009990007410788319
+        },
+        {
+            "original_index": 240,
+            "is_outlier": false,
+            "if_score": 0.04565150012201702,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007398083339004484
+        },
+        {
+            "original_index": 241,
+            "is_outlier": true,
+            "if_score": -0.01117391851387095,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0008271402183475865
+        },
+        {
+            "original_index": 242,
+            "is_outlier": false,
+            "if_score": 0.009121696964999426,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006605561023116115
+        },
+        {
+            "original_index": 243,
+            "is_outlier": false,
+            "if_score": 0.03750097617910658,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0026310351105620815
+        },
+        {
+            "original_index": 244,
+            "is_outlier": false,
+            "if_score": 0.031614316605001136,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029909621409599644
+        },
+        {
+            "original_index": 245,
+            "is_outlier": true,
+            "if_score": -0.021102237493499376,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004902130247196687
+        },
+        {
+            "original_index": 246,
+            "is_outlier": false,
+            "if_score": 0.016535105438297726,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021286239430748505
+        },
+        {
+            "original_index": 247,
+            "is_outlier": true,
+            "if_score": 0.04745276202220189,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.011901762027887626
+        },
+        {
+            "original_index": 248,
+            "is_outlier": true,
+            "if_score": -0.02745841655853304,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003158688712907503
+        },
+        {
+            "original_index": 249,
+            "is_outlier": false,
+            "if_score": 0.05546452579215144,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007721816152686261
+        },
+        {
+            "original_index": 250,
+            "is_outlier": true,
+            "if_score": -0.026196823585609874,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005424787290383291
+        },
+        {
+            "original_index": 251,
+            "is_outlier": false,
+            "if_score": 0.0488238618581443,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010201611099045593
+        },
+        {
+            "original_index": 252,
+            "is_outlier": false,
+            "if_score": 0.029287413650719185,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007348071107887382
+        },
+        {
+            "original_index": 253,
+            "is_outlier": false,
+            "if_score": 0.05260170454082774,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001138527748679121
+        },
+        {
+            "original_index": 254,
+            "is_outlier": false,
+            "if_score": 0.023819670623432543,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012497540696847424
+        },
+        {
+            "original_index": 255,
+            "is_outlier": false,
+            "if_score": 0.06896476095694076,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010813765961179092
+        },
+        {
+            "original_index": 256,
+            "is_outlier": true,
+            "if_score": -0.023819820189785124,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004941357398906942
+        },
+        {
+            "original_index": 257,
+            "is_outlier": false,
+            "if_score": 0.0036461682070064727,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006233922248124665
+        },
+        {
+            "original_index": 258,
+            "is_outlier": true,
+            "if_score": -0.050835197407120336,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01277295308515963
+        },
+        {
+            "original_index": 259,
+            "is_outlier": true,
+            "if_score": -0.0696126653269577,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.013165937392934885
+        },
+        {
+            "original_index": 260,
+            "is_outlier": true,
+            "if_score": -0.0409649055289546,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0022808573791499795
+        },
+        {
+            "original_index": 261,
+            "is_outlier": true,
+            "if_score": -0.03368572916673296,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012948688842277624
+        },
+        {
+            "original_index": 262,
+            "is_outlier": true,
+            "if_score": -0.0067860690879634755,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00446860212425079
+        },
+        {
+            "original_index": 263,
+            "is_outlier": false,
+            "if_score": 0.00286551330261986,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001305153239378871
+        },
+        {
+            "original_index": 264,
+            "is_outlier": false,
+            "if_score": 0.026361247813478317,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001544736521189849
+        },
+        {
+            "original_index": 265,
+            "is_outlier": true,
+            "if_score": -0.14103271724894434,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.017084479884722583
+        },
+        {
+            "original_index": 266,
+            "is_outlier": false,
+            "if_score": 0.020407381461842233,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023370518491275766
+        },
+        {
+            "original_index": 267,
+            "is_outlier": false,
+            "if_score": 0.009549701739927197,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011764159855254942
+        },
+        {
+            "original_index": 268,
+            "is_outlier": false,
+            "if_score": 0.05818525300168914,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002944790843156271
+        },
+        {
+            "original_index": 269,
+            "is_outlier": true,
+            "if_score": -0.017278992047204178,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001967615688911899
+        },
+        {
+            "original_index": 270,
+            "is_outlier": true,
+            "if_score": -0.08218567943156857,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014272162145274627
+        },
+        {
+            "original_index": 271,
+            "is_outlier": false,
+            "if_score": 0.02766877524516942,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0006460883811131046
+        },
+        {
+            "original_index": 272,
+            "is_outlier": true,
+            "if_score": -0.03315395701929008,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004611748256791734
+        },
+        {
+            "original_index": 273,
+            "is_outlier": true,
+            "if_score": -0.012638651268820078,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003350134869738403
+        },
+        {
+            "original_index": 274,
+            "is_outlier": true,
+            "if_score": -0.05151020313966298,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012549658225561376
+        },
+        {
+            "original_index": 275,
+            "is_outlier": true,
+            "if_score": 0.009323198264290733,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.012329297095622678
+        },
+        {
+            "original_index": 276,
+            "is_outlier": true,
+            "if_score": -0.031766904973177024,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00209451209711828
+        },
+        {
+            "original_index": 277,
+            "is_outlier": true,
+            "if_score": -0.001407736731560083,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0022330711778887112
+        },
+        {
+            "original_index": 278,
+            "is_outlier": true,
+            "if_score": -0.01092583950493281,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0005171100448705217
+        },
+        {
+            "original_index": 279,
+            "is_outlier": false,
+            "if_score": 0.059057332065840795,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021091130934303747
+        },
+        {
+            "original_index": 280,
+            "is_outlier": false,
+            "if_score": 0.021269812054207526,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002832891341280251
+        },
+        {
+            "original_index": 281,
+            "is_outlier": false,
+            "if_score": 0.012441129302417031,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006175370622042038
+        },
+        {
+            "original_index": 282,
+            "is_outlier": false,
+            "if_score": 0.04541980118003036,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011600014897565894
+        },
+        {
+            "original_index": 283,
+            "is_outlier": false,
+            "if_score": 0.054841268913472185,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002482164856274586
+        },
+        {
+            "original_index": 284,
+            "is_outlier": false,
+            "if_score": 0.03544061183131586,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007324470275143909
+        },
+        {
+            "original_index": 285,
+            "is_outlier": true,
+            "if_score": -0.036725897961828846,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0013026444634267748
+        },
+        {
+            "original_index": 286,
+            "is_outlier": false,
+            "if_score": 0.014464270645228705,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004192602036563046
+        },
+        {
+            "original_index": 287,
+            "is_outlier": true,
+            "if_score": -0.01893556845579747,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00214603085414476
+        },
+        {
+            "original_index": 288,
+            "is_outlier": true,
+            "if_score": -0.11440202930886784,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01741199890134689
+        },
+        {
+            "original_index": 289,
+            "is_outlier": true,
+            "if_score": -0.008906469257351335,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023850396006491197
+        },
+        {
+            "original_index": 290,
+            "is_outlier": true,
+            "if_score": -0.08740953936448598,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.02151591072408906
+        },
+        {
+            "original_index": 291,
+            "is_outlier": false,
+            "if_score": 0.052509216481147425,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011341982039436344
+        },
+        {
+            "original_index": 292,
+            "is_outlier": false,
+            "if_score": 0.05414878488041491,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017000774697085044
+        },
+        {
+            "original_index": 293,
+            "is_outlier": false,
+            "if_score": 0.04716426317591804,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001637050065488971
+        },
+        {
+            "original_index": 294,
+            "is_outlier": false,
+            "if_score": 0.009982261529117409,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007014072037778743
+        },
+        {
+            "original_index": 295,
+            "is_outlier": true,
+            "if_score": -0.009794675467880709,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007236690257028491
+        },
+        {
+            "original_index": 296,
+            "is_outlier": true,
+            "if_score": -0.044931674757036855,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0030311388703764515
+        },
+        {
+            "original_index": 297,
+            "is_outlier": false,
+            "if_score": 0.027574666517009183,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004621471895212028
+        },
+        {
+            "original_index": 298,
+            "is_outlier": false,
+            "if_score": 0.023714894767374706,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002301575501500427
+        },
+        {
+            "original_index": 299,
+            "is_outlier": false,
+            "if_score": 0.002553609518480493,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003126260395227627
+        },
+        {
+            "original_index": 300,
+            "is_outlier": false,
+            "if_score": 0.035094673518878905,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002679347596883362
+        },
+        {
+            "original_index": 301,
+            "is_outlier": false,
+            "if_score": 0.03264265550537282,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023205834300285724
+        },
+        {
+            "original_index": 302,
+            "is_outlier": true,
+            "if_score": -0.015423794722505935,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029589231890379255
+        },
+        {
+            "original_index": 303,
+            "is_outlier": false,
+            "if_score": 0.03707104446850823,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0025847057008213156
+        },
+        {
+            "original_index": 304,
+            "is_outlier": false,
+            "if_score": 0.05377294000759242,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018471800542273222
+        },
+        {
+            "original_index": 305,
+            "is_outlier": true,
+            "if_score": -0.04825415067464617,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0025854060047042545
+        },
+        {
+            "original_index": 306,
+            "is_outlier": true,
+            "if_score": -0.0117032738376599,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016110195141368013
+        },
+        {
+            "original_index": 307,
+            "is_outlier": true,
+            "if_score": -0.0533372255164824,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003985114994113009
+        },
+        {
+            "original_index": 308,
+            "is_outlier": true,
+            "if_score": -0.09594533026268132,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010091738530804994
+        },
+        {
+            "original_index": 309,
+            "is_outlier": true,
+            "if_score": -0.03563609039477378,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009114886959522567
+        },
+        {
+            "original_index": 310,
+            "is_outlier": false,
+            "if_score": 0.008389029416422666,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019448664613455847
+        },
+        {
+            "original_index": 311,
+            "is_outlier": true,
+            "if_score": -0.0387010893004362,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0005828237752976761
+        },
+        {
+            "original_index": 312,
+            "is_outlier": false,
+            "if_score": 0.04366306500430939,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012728220682749762
+        },
+        {
+            "original_index": 313,
+            "is_outlier": true,
+            "if_score": -0.04031977100778805,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002652254097630663
+        },
+        {
+            "original_index": 314,
+            "is_outlier": true,
+            "if_score": -0.20228739483217223,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.010474618262470916
+        },
+        {
+            "original_index": 315,
+            "is_outlier": true,
+            "if_score": -0.039208260048682886,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018256109919950409
+        },
+        {
+            "original_index": 316,
+            "is_outlier": true,
+            "if_score": -0.03688161845354515,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011254319603816838
+        },
+        {
+            "original_index": 317,
+            "is_outlier": false,
+            "if_score": 0.04460402478942649,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0005007943686327359
+        },
+        {
+            "original_index": 318,
+            "is_outlier": true,
+            "if_score": -0.11190399700872294,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007804466987993172
+        },
+        {
+            "original_index": 319,
+            "is_outlier": true,
+            "if_score": -0.09392247482860544,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004550949800460375
+        },
+        {
+            "original_index": 320,
+            "is_outlier": false,
+            "if_score": 0.004292613070844775,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012379128722747206
+        },
+        {
+            "original_index": 321,
+            "is_outlier": true,
+            "if_score": -0.02324538178565494,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021888503365499836
+        },
+        {
+            "original_index": 322,
+            "is_outlier": false,
+            "if_score": 0.04046575231971722,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0026444066390544363
+        },
+        {
+            "original_index": 323,
+            "is_outlier": true,
+            "if_score": -0.0015808837625828631,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.009390367444589978
+        },
+        {
+            "original_index": 324,
+            "is_outlier": false,
+            "if_score": 0.04670765703677349,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0005752214225429984
+        },
+        {
+            "original_index": 325,
+            "is_outlier": false,
+            "if_score": 0.05536128671893503,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010842611463968313
+        },
+        {
+            "original_index": 326,
+            "is_outlier": true,
+            "if_score": -0.0021421337874557023,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019058092475081438
+        },
+        {
+            "original_index": 327,
+            "is_outlier": true,
+            "if_score": -0.011939666513696101,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014426506502516233
+        },
+        {
+            "original_index": 328,
+            "is_outlier": false,
+            "if_score": 0.05822415727085889,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002190013473487029
+        },
+        {
+            "original_index": 329,
+            "is_outlier": false,
+            "if_score": 0.00035263047970252037,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006370149597902028
+        },
+        {
+            "original_index": 330,
+            "is_outlier": false,
+            "if_score": 0.06611594211286925,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018228449939245064
+        },
+        {
+            "original_index": 331,
+            "is_outlier": false,
+            "if_score": 0.057143135781094256,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024491610146806443
+        },
+        {
+            "original_index": 332,
+            "is_outlier": true,
+            "if_score": -0.06451390369476168,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005463672583771867
+        },
+        {
+            "original_index": 333,
+            "is_outlier": true,
+            "if_score": -0.005574097338857276,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012310362941812974
+        },
+        {
+            "original_index": 334,
+            "is_outlier": true,
+            "if_score": -0.007487872045880861,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009512206587152589
+        },
+        {
+            "original_index": 335,
+            "is_outlier": false,
+            "if_score": 0.04178118293598182,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0047900295071795305
+        },
+        {
+            "original_index": 336,
+            "is_outlier": false,
+            "if_score": 0.045523316812602854,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0042952941078447495
+        },
+        {
+            "original_index": 337,
+            "is_outlier": false,
+            "if_score": 0.03394375103689112,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0036612101201416634
+        },
+        {
+            "original_index": 338,
+            "is_outlier": false,
+            "if_score": 0.021795499590349765,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001648667020236376
+        },
+        {
+            "original_index": 339,
+            "is_outlier": true,
+            "if_score": -0.022428383067278235,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027863833322395665
+        },
+        {
+            "original_index": 340,
+            "is_outlier": false,
+            "if_score": 0.06405833650753773,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007476688367793913
+        },
+        {
+            "original_index": 341,
+            "is_outlier": false,
+            "if_score": 0.040342975368356515,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004546821718727309
+        },
+        {
+            "original_index": 342,
+            "is_outlier": false,
+            "if_score": 0.04483763355327519,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009243493431593891
+        },
+        {
+            "original_index": 343,
+            "is_outlier": false,
+            "if_score": 0.02797783579129015,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006822791213551852
+        },
+        {
+            "original_index": 344,
+            "is_outlier": false,
+            "if_score": 0.024509565723158322,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002622229512626255
+        },
+        {
+            "original_index": 345,
+            "is_outlier": true,
+            "if_score": -0.05581921569687559,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0041072980050633175
+        },
+        {
+            "original_index": 346,
+            "is_outlier": false,
+            "if_score": 0.01894795915728492,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001086712494531338
+        },
+        {
+            "original_index": 347,
+            "is_outlier": false,
+            "if_score": 0.029801894503283688,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001317291587698693
+        },
+        {
+            "original_index": 348,
+            "is_outlier": false,
+            "if_score": 0.02336376148219227,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019499912752729807
+        },
+        {
+            "original_index": 349,
+            "is_outlier": false,
+            "if_score": 0.0046979446014529525,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00654119245014583
+        },
+        {
+            "original_index": 350,
+            "is_outlier": false,
+            "if_score": 0.0014047798705111303,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0013509944499849988
+        },
+        {
+            "original_index": 351,
+            "is_outlier": true,
+            "if_score": -0.030739970887212198,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007385674244232848
+        },
+        {
+            "original_index": 352,
+            "is_outlier": true,
+            "if_score": -0.05387092163761581,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007193485251209588
+        },
+        {
+            "original_index": 353,
+            "is_outlier": false,
+            "if_score": 0.02545366766046714,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004153768629488381
+        },
+        {
+            "original_index": 354,
+            "is_outlier": false,
+            "if_score": 0.009029479481169389,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006276764862318618
+        },
+        {
+            "original_index": 355,
+            "is_outlier": false,
+            "if_score": 0.011476960044545348,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004625375438241508
+        },
+        {
+            "original_index": 356,
+            "is_outlier": false,
+            "if_score": 0.017107120058221348,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015715250378705295
+        },
+        {
+            "original_index": 357,
+            "is_outlier": false,
+            "if_score": 0.015131760254211757,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001299593416066848
+        },
+        {
+            "original_index": 358,
+            "is_outlier": true,
+            "if_score": -0.0015678395100108822,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004638272554292245
+        },
+        {
+            "original_index": 359,
+            "is_outlier": false,
+            "if_score": 0.04207023780398128,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002961344955546742
+        },
+        {
+            "original_index": 360,
+            "is_outlier": true,
+            "if_score": -0.07320553252016032,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0013029378391576393
+        },
+        {
+            "original_index": 361,
+            "is_outlier": false,
+            "if_score": 0.02904645799096056,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0005256995150136005
+        },
+        {
+            "original_index": 362,
+            "is_outlier": false,
+            "if_score": 0.05761274919642945,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0004740315252681941
+        },
+        {
+            "original_index": 363,
+            "is_outlier": false,
+            "if_score": 0.04960528537000242,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002030792757151763
+        },
+        {
+            "original_index": 364,
+            "is_outlier": false,
+            "if_score": 0.03209561929004806,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0006453403443653068
+        },
+        {
+            "original_index": 365,
+            "is_outlier": false,
+            "if_score": 0.005757466324869509,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0008832887751352796
+        },
+        {
+            "original_index": 366,
+            "is_outlier": true,
+            "if_score": -0.040030404807150755,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004650778457270095
+        },
+        {
+            "original_index": 367,
+            "is_outlier": false,
+            "if_score": 0.053662159949849964,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009344945328334229
+        },
+        {
+            "original_index": 368,
+            "is_outlier": true,
+            "if_score": -0.07466033568620706,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0058882968382370825
+        },
+        {
+            "original_index": 369,
+            "is_outlier": false,
+            "if_score": 0.003358480425428023,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029899244800136605
+        },
+        {
+            "original_index": 370,
+            "is_outlier": false,
+            "if_score": 0.05389754798231361,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005811099977697058
+        },
+        {
+            "original_index": 371,
+            "is_outlier": true,
+            "if_score": -0.010055586257127158,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010529029010951478
+        },
+        {
+            "original_index": 372,
+            "is_outlier": false,
+            "if_score": 0.029997342832320972,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0036782531661539455
+        },
+        {
+            "original_index": 373,
+            "is_outlier": true,
+            "if_score": -0.0036630016255934095,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0020555817026147705
+        },
+        {
+            "original_index": 374,
+            "is_outlier": false,
+            "if_score": 0.048871145225535484,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019484182263826168
+        },
+        {
+            "original_index": 375,
+            "is_outlier": false,
+            "if_score": 0.06044927347021328,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027828323672464145
+        },
+        {
+            "original_index": 376,
+            "is_outlier": true,
+            "if_score": -0.044680277888448416,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.011421123917538634
+        },
+        {
+            "original_index": 377,
+            "is_outlier": true,
+            "if_score": -0.06801759526782764,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019261162792241066
+        },
+        {
+            "original_index": 378,
+            "is_outlier": false,
+            "if_score": 0.060401099669591285,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0028719200526791037
+        },
+        {
+            "original_index": 379,
+            "is_outlier": true,
+            "if_score": -0.057148905632310176,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.010705552032539629
+        },
+        {
+            "original_index": 380,
+            "is_outlier": false,
+            "if_score": 0.03932295714556616,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0035537512972265055
+        },
+        {
+            "original_index": 381,
+            "is_outlier": false,
+            "if_score": 0.03906418419972524,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002399438725497581
+        },
+        {
+            "original_index": 382,
+            "is_outlier": true,
+            "if_score": 0.02598449262295588,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.012027954330950403
+        },
+        {
+            "original_index": 383,
+            "is_outlier": false,
+            "if_score": 0.04044040968206275,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018202713906934277
+        },
+        {
+            "original_index": 384,
+            "is_outlier": false,
+            "if_score": 0.04519406551381677,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017838490638959338
+        },
+        {
+            "original_index": 385,
+            "is_outlier": false,
+            "if_score": 0.02884247221765429,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002537237577393179
+        },
+        {
+            "original_index": 386,
+            "is_outlier": false,
+            "if_score": 0.04998125859639663,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003180583610390857
+        },
+        {
+            "original_index": 387,
+            "is_outlier": true,
+            "if_score": -0.003107378010553885,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001786763125049166
+        },
+        {
+            "original_index": 388,
+            "is_outlier": true,
+            "if_score": 0.010736606689866979,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008700324980481518
+        },
+        {
+            "original_index": 389,
+            "is_outlier": true,
+            "if_score": -0.051005758214323016,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008586027313622608
+        },
+        {
+            "original_index": 390,
+            "is_outlier": false,
+            "if_score": 0.003935036865635955,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001006973535855315
+        },
+        {
+            "original_index": 391,
+            "is_outlier": true,
+            "if_score": -0.08805526580462336,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0058256431193276234
+        },
+        {
+            "original_index": 392,
+            "is_outlier": false,
+            "if_score": 0.05799633803120052,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021561576754903955
+        },
+        {
+            "original_index": 393,
+            "is_outlier": true,
+            "if_score": -0.010688852167955343,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018456593064317475
+        },
+        {
+            "original_index": 394,
+            "is_outlier": false,
+            "if_score": 0.051362503779494806,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019143853986591493
+        },
+        {
+            "original_index": 395,
+            "is_outlier": false,
+            "if_score": 0.01512555899902246,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0013967546116785301
+        },
+        {
+            "original_index": 396,
+            "is_outlier": false,
+            "if_score": 0.050391853620812666,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017413211381858843
+        },
+        {
+            "original_index": 397,
+            "is_outlier": false,
+            "if_score": 0.04569609106303618,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004631527161546873
+        },
+        {
+            "original_index": 398,
+            "is_outlier": false,
+            "if_score": 0.04904523370346692,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027743911598806085
+        },
+        {
+            "original_index": 399,
+            "is_outlier": false,
+            "if_score": 0.05655232904223162,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007787011385634189
+        },
+        {
+            "original_index": 400,
+            "is_outlier": true,
+            "if_score": -0.009103694363934156,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005379871329002612
+        },
+        {
+            "original_index": 401,
+            "is_outlier": false,
+            "if_score": 0.018052294074179243,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001758577002414253
+        },
+        {
+            "original_index": 402,
+            "is_outlier": false,
+            "if_score": 0.04040532599459351,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003983851790436799
+        },
+        {
+            "original_index": 403,
+            "is_outlier": false,
+            "if_score": 0.04910141930867018,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0013741054441722836
+        },
+        {
+            "original_index": 404,
+            "is_outlier": true,
+            "if_score": -0.001980108987555851,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021658731659934404
+        },
+        {
+            "original_index": 405,
+            "is_outlier": false,
+            "if_score": 0.04409883766149908,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002253464296050138
+        },
+        {
+            "original_index": 406,
+            "is_outlier": false,
+            "if_score": 0.027406482679074695,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0003501070441688158
+        },
+        {
+            "original_index": 407,
+            "is_outlier": false,
+            "if_score": 0.002658370364156115,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004316617382842725
+        },
+        {
+            "original_index": 408,
+            "is_outlier": false,
+            "if_score": 0.06378049247346973,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014251894833513486
+        },
+        {
+            "original_index": 409,
+            "is_outlier": false,
+            "if_score": 0.032349387994961454,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0026940836531082497
+        },
+        {
+            "original_index": 410,
+            "is_outlier": false,
+            "if_score": 0.03093610976175798,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00394919451791101
+        },
+        {
+            "original_index": 411,
+            "is_outlier": false,
+            "if_score": 0.04652020093537651,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016090069544220582
+        },
+        {
+            "original_index": 412,
+            "is_outlier": false,
+            "if_score": 0.02499026892551265,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006439546596191616
+        },
+        {
+            "original_index": 413,
+            "is_outlier": false,
+            "if_score": 0.03886131833339379,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002485977733654296
+        },
+        {
+            "original_index": 414,
+            "is_outlier": true,
+            "if_score": -0.05387400844244811,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004885423461969959
+        },
+        {
+            "original_index": 415,
+            "is_outlier": false,
+            "if_score": 0.04656401993177517,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001728945938714177
+        },
+        {
+            "original_index": 416,
+            "is_outlier": true,
+            "if_score": -0.07916689653912562,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0043214417118259555
+        },
+        {
+            "original_index": 417,
+            "is_outlier": false,
+            "if_score": 0.010077678679857871,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0076806054547183126
+        },
+        {
+            "original_index": 418,
+            "is_outlier": false,
+            "if_score": 0.005808763011442286,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017160015323978766
+        },
+        {
+            "original_index": 419,
+            "is_outlier": true,
+            "if_score": -0.00761671284335208,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00164633828381452
+        },
+        {
+            "original_index": 420,
+            "is_outlier": false,
+            "if_score": 0.0480262522194968,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014461121447304226
+        },
+        {
+            "original_index": 421,
+            "is_outlier": true,
+            "if_score": -0.0011394468725278162,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0042753976611942125
+        },
+        {
+            "original_index": 422,
+            "is_outlier": false,
+            "if_score": 0.05871574629340842,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014498930352901645
+        },
+        {
+            "original_index": 423,
+            "is_outlier": false,
+            "if_score": 0.058640253621565885,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017801750246136917
+        },
+        {
+            "original_index": 424,
+            "is_outlier": true,
+            "if_score": -0.036403080884612804,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006637533557311124
+        },
+        {
+            "original_index": 425,
+            "is_outlier": true,
+            "if_score": -0.022942722317915942,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002268190255241285
+        },
+        {
+            "original_index": 426,
+            "is_outlier": false,
+            "if_score": 0.03432476787682143,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007729233406046326
+        },
+        {
+            "original_index": 427,
+            "is_outlier": false,
+            "if_score": 0.01814876723961395,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001548069648867087
+        },
+        {
+            "original_index": 428,
+            "is_outlier": false,
+            "if_score": 0.003025252401087364,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0008646456455046504
+        },
+        {
+            "original_index": 429,
+            "is_outlier": false,
+            "if_score": 0.0005437827622095659,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009258062125007529
+        },
+        {
+            "original_index": 430,
+            "is_outlier": false,
+            "if_score": 0.012224170492035002,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007543837074223385
+        },
+        {
+            "original_index": 431,
+            "is_outlier": false,
+            "if_score": 0.030839881785109435,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014956487328753557
+        },
+        {
+            "original_index": 432,
+            "is_outlier": false,
+            "if_score": 0.05819610423322785,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004841635034466715
+        },
+        {
+            "original_index": 433,
+            "is_outlier": false,
+            "if_score": 0.017606905405741557,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011682980161535864
+        },
+        {
+            "original_index": 434,
+            "is_outlier": false,
+            "if_score": 0.035974335538562774,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0003080481447801695
+        },
+        {
+            "original_index": 435,
+            "is_outlier": false,
+            "if_score": 0.0410358944962636,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00153365448984455
+        },
+        {
+            "original_index": 436,
+            "is_outlier": false,
+            "if_score": 0.0638224233743726,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001703460783775939
+        },
+        {
+            "original_index": 437,
+            "is_outlier": false,
+            "if_score": 0.04312916451483678,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0006066468336637616
+        },
+        {
+            "original_index": 438,
+            "is_outlier": false,
+            "if_score": 0.004100727828500794,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0007706162253787915
+        },
+        {
+            "original_index": 439,
+            "is_outlier": false,
+            "if_score": 0.006846968329936698,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010996545536436182
+        },
+        {
+            "original_index": 440,
+            "is_outlier": false,
+            "if_score": 0.03733076016377673,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0054789653965732965
+        },
+        {
+            "original_index": 441,
+            "is_outlier": false,
+            "if_score": 0.0063082737951856704,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005083651384701988
+        },
+        {
+            "original_index": 442,
+            "is_outlier": true,
+            "if_score": -0.002637229264325358,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021470842212356067
+        },
+        {
+            "original_index": 443,
+            "is_outlier": true,
+            "if_score": -0.10283632773869106,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006264271055837813
+        },
+        {
+            "original_index": 444,
+            "is_outlier": false,
+            "if_score": 0.05235900597037224,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010423028348711093
+        },
+        {
+            "original_index": 445,
+            "is_outlier": false,
+            "if_score": 0.02228557093778305,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0023736879744503296
+        },
+        {
+            "original_index": 446,
+            "is_outlier": false,
+            "if_score": 0.0069672624429049645,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0030055246632185997
+        },
+        {
+            "original_index": 447,
+            "is_outlier": false,
+            "if_score": 0.05374539340460999,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002257757040210141
+        },
+        {
+            "original_index": 448,
+            "is_outlier": false,
+            "if_score": 0.05085739760536351,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002473417240171404
+        },
+        {
+            "original_index": 449,
+            "is_outlier": false,
+            "if_score": 0.005590641779763372,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027183696712150167
+        },
+        {
+            "original_index": 450,
+            "is_outlier": true,
+            "if_score": 0.004322724331022654,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.010948393277838277
+        },
+        {
+            "original_index": 451,
+            "is_outlier": false,
+            "if_score": 0.02258957177827392,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0057140203556070935
+        },
+        {
+            "original_index": 452,
+            "is_outlier": true,
+            "if_score": -0.03015446341488459,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002096805502580003
+        },
+        {
+            "original_index": 453,
+            "is_outlier": false,
+            "if_score": 0.04585468614095034,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00230999936319614
+        },
+        {
+            "original_index": 454,
+            "is_outlier": false,
+            "if_score": 0.04723923629636462,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001314904075766873
+        },
+        {
+            "original_index": 455,
+            "is_outlier": true,
+            "if_score": -0.08010878342647215,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003951542166975099
+        },
+        {
+            "original_index": 456,
+            "is_outlier": true,
+            "if_score": -0.008331352426029837,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004561504747159123
+        },
+        {
+            "original_index": 457,
+            "is_outlier": true,
+            "if_score": -0.02417015720409904,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001016364664124389
+        },
+        {
+            "original_index": 458,
+            "is_outlier": true,
+            "if_score": -0.01994914594187913,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011097882405669086
+        },
+        {
+            "original_index": 459,
+            "is_outlier": true,
+            "if_score": -0.08745965717592968,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024803435749762097
+        },
+        {
+            "original_index": 460,
+            "is_outlier": true,
+            "if_score": -0.002501746457097054,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0044452039380116866
+        },
+        {
+            "original_index": 461,
+            "is_outlier": true,
+            "if_score": -0.18034149637239433,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01260738874884005
+        },
+        {
+            "original_index": 462,
+            "is_outlier": true,
+            "if_score": -0.018648185267969575,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0020939421434500315
+        },
+        {
+            "original_index": 463,
+            "is_outlier": false,
+            "if_score": 0.05721875944695992,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015378706640969896
+        },
+        {
+            "original_index": 464,
+            "is_outlier": false,
+            "if_score": 0.05002213378516246,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021596533710344385
+        },
+        {
+            "original_index": 465,
+            "is_outlier": true,
+            "if_score": 0.05367995745473869,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.010705154241677145
+        },
+        {
+            "original_index": 466,
+            "is_outlier": false,
+            "if_score": 0.048520589601127595,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029425265995865575
+        },
+        {
+            "original_index": 467,
+            "is_outlier": false,
+            "if_score": 0.00342014129409679,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0021220338295816076
+        },
+        {
+            "original_index": 468,
+            "is_outlier": true,
+            "if_score": -0.0027428053930733665,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.009496033911775153
+        },
+        {
+            "original_index": 469,
+            "is_outlier": true,
+            "if_score": -0.022578330135414437,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.006549118734862943
+        },
+        {
+            "original_index": 470,
+            "is_outlier": false,
+            "if_score": 0.02747234666217302,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027885790075407747
+        },
+        {
+            "original_index": 471,
+            "is_outlier": true,
+            "if_score": -0.09687232121664885,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027952371268885373
+        },
+        {
+            "original_index": 472,
+            "is_outlier": false,
+            "if_score": 0.03752775668462127,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0020765719785834406
+        },
+        {
+            "original_index": 473,
+            "is_outlier": true,
+            "if_score": -0.23079647923893049,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.008795867708848246
+        },
+        {
+            "original_index": 474,
+            "is_outlier": false,
+            "if_score": 0.045876707711934694,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0034484387429296283
+        },
+        {
+            "original_index": 475,
+            "is_outlier": false,
+            "if_score": 0.05937660377250781,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012180027046490845
+        },
+        {
+            "original_index": 476,
+            "is_outlier": false,
+            "if_score": 0.050042863459594134,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024152501127685474
+        },
+        {
+            "original_index": 477,
+            "is_outlier": false,
+            "if_score": 0.02504354107789719,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0026109884142801556
+        },
+        {
+            "original_index": 478,
+            "is_outlier": false,
+            "if_score": 0.05379351302035695,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.000994734885861968
+        },
+        {
+            "original_index": 479,
+            "is_outlier": false,
+            "if_score": 0.03171307780645399,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003212844102086635
+        },
+        {
+            "original_index": 480,
+            "is_outlier": false,
+            "if_score": 0.047757347261818406,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001700855704221901
+        },
+        {
+            "original_index": 481,
+            "is_outlier": false,
+            "if_score": 0.03699799119898156,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0008120157773338427
+        },
+        {
+            "original_index": 482,
+            "is_outlier": false,
+            "if_score": 0.05148934721978621,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001907505977407272
+        },
+        {
+            "original_index": 483,
+            "is_outlier": false,
+            "if_score": 0.04628209771731545,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009688849324354505
+        },
+        {
+            "original_index": 484,
+            "is_outlier": false,
+            "if_score": 0.04236968041319622,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003977635603894702
+        },
+        {
+            "original_index": 485,
+            "is_outlier": true,
+            "if_score": -0.024593618487641078,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003928492823129583
+        },
+        {
+            "original_index": 486,
+            "is_outlier": false,
+            "if_score": 0.02819201780716435,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012457777721540002
+        },
+        {
+            "original_index": 487,
+            "is_outlier": false,
+            "if_score": 0.053423396950726565,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014953761007253834
+        },
+        {
+            "original_index": 488,
+            "is_outlier": false,
+            "if_score": 0.05070712682255557,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002031813535171882
+        },
+        {
+            "original_index": 489,
+            "is_outlier": false,
+            "if_score": 0.023166236301876142,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00858984692590148
+        },
+        {
+            "original_index": 490,
+            "is_outlier": false,
+            "if_score": 0.01390916612636861,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015339356254845408
+        },
+        {
+            "original_index": 491,
+            "is_outlier": true,
+            "if_score": -0.060671899405288776,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002773837622871734
+        },
+        {
+            "original_index": 492,
+            "is_outlier": true,
+            "if_score": 0.026542475850097502,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0019718592738188893
+        },
+        {
+            "original_index": 493,
+            "is_outlier": true,
+            "if_score": -0.07404622811842837,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003729300315233662
+        },
+        {
+            "original_index": 494,
+            "is_outlier": false,
+            "if_score": 0.012108036678510126,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010211784127056463
+        },
+        {
+            "original_index": 495,
+            "is_outlier": false,
+            "if_score": 0.04835358170394838,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001979361834572977
+        },
+        {
+            "original_index": 496,
+            "is_outlier": false,
+            "if_score": 0.05006814564081774,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015607102283914972
+        },
+        {
+            "original_index": 497,
+            "is_outlier": false,
+            "if_score": 0.04602121578113061,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010944493535815212
+        },
+        {
+            "original_index": 498,
+            "is_outlier": false,
+            "if_score": 0.0440031316349655,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0022140046371395615
+        },
+        {
+            "original_index": 499,
+            "is_outlier": false,
+            "if_score": 0.04068051868023648,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018913939389865768
+        },
+        {
+            "original_index": 500,
+            "is_outlier": false,
+            "if_score": 0.040446074257589226,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0036674676078192166
+        },
+        {
+            "original_index": 501,
+            "is_outlier": true,
+            "if_score": -0.027429776104608394,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004270481049282113
+        },
+        {
+            "original_index": 502,
+            "is_outlier": false,
+            "if_score": 0.04639693779809251,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0032079027770168934
+        },
+        {
+            "original_index": 503,
+            "is_outlier": true,
+            "if_score": -0.07280292954417938,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004273361723724992
+        },
+        {
+            "original_index": 504,
+            "is_outlier": true,
+            "if_score": -0.05585099686256162,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01891891550325915
+        },
+        {
+            "original_index": 505,
+            "is_outlier": true,
+            "if_score": -0.0772220445554807,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.019556877773346932
+        },
+        {
+            "original_index": 506,
+            "is_outlier": false,
+            "if_score": 0.04511911600565943,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0028280325530786695
+        },
+        {
+            "original_index": 507,
+            "is_outlier": true,
+            "if_score": -0.003202933578771494,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004331522199255249
+        },
+        {
+            "original_index": 508,
+            "is_outlier": false,
+            "if_score": 0.013226588103818604,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002202884466963537
+        },
+        {
+            "original_index": 509,
+            "is_outlier": false,
+            "if_score": 0.02216272340113873,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00530334850877193
+        },
+        {
+            "original_index": 510,
+            "is_outlier": false,
+            "if_score": 0.03845583212793047,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004830239074618196
+        },
+        {
+            "original_index": 511,
+            "is_outlier": false,
+            "if_score": 0.007380220505533386,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0008983141988678852
+        },
+        {
+            "original_index": 512,
+            "is_outlier": false,
+            "if_score": 0.0528202737853774,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015483863469231334
+        },
+        {
+            "original_index": 513,
+            "is_outlier": false,
+            "if_score": 0.049712798347486875,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012411592982201323
+        },
+        {
+            "original_index": 514,
+            "is_outlier": false,
+            "if_score": 0.04667298209691134,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011874938334677531
+        },
+        {
+            "original_index": 515,
+            "is_outlier": false,
+            "if_score": 0.05067887520089254,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001917134508520707
+        },
+        {
+            "original_index": 516,
+            "is_outlier": false,
+            "if_score": 0.04872095471864324,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0013893769530993088
+        },
+        {
+            "original_index": 517,
+            "is_outlier": false,
+            "if_score": 0.04158845576119191,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0016942842811031177
+        },
+        {
+            "original_index": 518,
+            "is_outlier": false,
+            "if_score": 0.03574011363624563,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0056548220672736176
+        },
+        {
+            "original_index": 519,
+            "is_outlier": false,
+            "if_score": 0.05120351898146347,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027850847741485063
+        },
+        {
+            "original_index": 520,
+            "is_outlier": true,
+            "if_score": -0.04819907193103651,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.010092205943055054
+        },
+        {
+            "original_index": 521,
+            "is_outlier": true,
+            "if_score": -0.0048461066944092135,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003325068245243507
+        },
+        {
+            "original_index": 522,
+            "is_outlier": false,
+            "if_score": 0.0024943126757550615,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0014708481734269792
+        },
+        {
+            "original_index": 523,
+            "is_outlier": false,
+            "if_score": 0.04396437110505991,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0010567497541730559
+        },
+        {
+            "original_index": 524,
+            "is_outlier": false,
+            "if_score": 0.035804113067074594,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0028005141498903667
+        },
+        {
+            "original_index": 525,
+            "is_outlier": true,
+            "if_score": -0.016335270175243055,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0033407953151390613
+        },
+        {
+            "original_index": 526,
+            "is_outlier": false,
+            "if_score": 0.023774894752116638,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018902948211689853
+        },
+        {
+            "original_index": 527,
+            "is_outlier": false,
+            "if_score": 0.01590178836866829,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0015411027041831212
+        },
+        {
+            "original_index": 528,
+            "is_outlier": true,
+            "if_score": 0.003892414979870251,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.013997258495916372
+        },
+        {
+            "original_index": 529,
+            "is_outlier": false,
+            "if_score": 0.02119364658443801,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018533604821745857
+        },
+        {
+            "original_index": 530,
+            "is_outlier": false,
+            "if_score": 0.03210655427753317,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003093550429172654
+        },
+        {
+            "original_index": 531,
+            "is_outlier": false,
+            "if_score": 0.012218144998025648,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018446445752582361
+        },
+        {
+            "original_index": 532,
+            "is_outlier": false,
+            "if_score": 0.006465554855337674,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0009102965970267313
+        },
+        {
+            "original_index": 533,
+            "is_outlier": false,
+            "if_score": 0.010135869690435562,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0034720703797769775
+        },
+        {
+            "original_index": 534,
+            "is_outlier": false,
+            "if_score": 0.04157585990755858,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0024884307130622744
+        },
+        {
+            "original_index": 535,
+            "is_outlier": false,
+            "if_score": 0.047947051945726904,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0020167124721092
+        },
+        {
+            "original_index": 536,
+            "is_outlier": false,
+            "if_score": 0.044512785855398584,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0030958678621754725
+        },
+        {
+            "original_index": 537,
+            "is_outlier": true,
+            "if_score": -0.02955980661823926,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0072667301648767025
+        },
+        {
+            "original_index": 538,
+            "is_outlier": true,
+            "if_score": -0.08608807530845813,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007455529660797522
+        },
+        {
+            "original_index": 539,
+            "is_outlier": true,
+            "if_score": -0.0672592217376739,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00936867692925869
+        },
+        {
+            "original_index": 540,
+            "is_outlier": false,
+            "if_score": 0.030589582140266525,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027718908222174204
+        },
+        {
+            "original_index": 541,
+            "is_outlier": false,
+            "if_score": 0.03632602862273965,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029363474990526947
+        },
+        {
+            "original_index": 542,
+            "is_outlier": false,
+            "if_score": 0.00919928897832939,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012347794127992382
+        },
+        {
+            "original_index": 543,
+            "is_outlier": true,
+            "if_score": -0.027430850737757917,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0012806495615337872
+        },
+        {
+            "original_index": 544,
+            "is_outlier": false,
+            "if_score": 0.06454944708271859,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0020182133823003433
+        },
+        {
+            "original_index": 545,
+            "is_outlier": false,
+            "if_score": 0.037881123871092215,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0004204537773856967
+        },
+        {
+            "original_index": 546,
+            "is_outlier": false,
+            "if_score": 0.005806207775844785,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011388559517596507
+        },
+        {
+            "original_index": 547,
+            "is_outlier": false,
+            "if_score": 0.025495522773560597,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001897179572136803
+        },
+        {
+            "original_index": 548,
+            "is_outlier": false,
+            "if_score": 0.008008169393642794,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0011425354813269185
+        },
+        {
+            "original_index": 549,
+            "is_outlier": true,
+            "if_score": -0.02919703559873832,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0018900770811572348
+        },
+        {
+            "original_index": 550,
+            "is_outlier": true,
+            "if_score": -0.06462883460465357,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027432712102823456
+        },
+        {
+            "original_index": 551,
+            "is_outlier": false,
+            "if_score": 0.02899742427572255,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0029397792817360147
+        },
+        {
+            "original_index": 552,
+            "is_outlier": true,
+            "if_score": -0.051724270911496395,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002070725979362367
+        },
+        {
+            "original_index": 553,
+            "is_outlier": true,
+            "if_score": -0.0409316302079607,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0017652001424941443
+        },
+        {
+            "original_index": 554,
+            "is_outlier": true,
+            "if_score": -0.006916052712634402,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.002525029293806333
+        },
+        {
+            "original_index": 555,
+            "is_outlier": true,
+            "if_score": -0.01172284001142565,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0048055012192059965
+        },
+        {
+            "original_index": 556,
+            "is_outlier": true,
+            "if_score": -0.04383557549856659,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.001746865038345085
+        },
+        {
+            "original_index": 557,
+            "is_outlier": true,
+            "if_score": -0.19296706835903626,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004382582674662672
+        },
+        {
+            "original_index": 558,
+            "is_outlier": false,
+            "if_score": 0.005932930588278984,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.00604103721750941
+        },
+        {
+            "original_index": 559,
+            "is_outlier": false,
+            "if_score": 0.009942321863300907,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007943041153757907
+        },
+        {
+            "original_index": 560,
+            "is_outlier": false,
+            "if_score": 0.011927311592191014,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0027841994547308582
+        },
+        {
+            "original_index": 561,
+            "is_outlier": true,
+            "if_score": -0.24724093482138826,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.011453180173139817
+        },
+        {
+            "original_index": 562,
+            "is_outlier": true,
+            "if_score": -0.023050628241516824,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.01616541238092265
+        },
+        {
+            "original_index": 563,
+            "is_outlier": true,
+            "if_score": -0.00647888874932917,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.003662389608537241
+        },
+        {
+            "original_index": 564,
+            "is_outlier": true,
+            "if_score": -0.01393408322853934,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.005609477298493465
+        },
+        {
+            "original_index": 565,
+            "is_outlier": true,
+            "if_score": -0.06562281614390136,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.004375285284061091
+        },
+        {
+            "original_index": 566,
+            "is_outlier": false,
+            "if_score": 0.006335524047165253,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.0031051704982746125
+        },
+        {
+            "original_index": 567,
+            "is_outlier": true,
+            "if_score": -0.051263523617044504,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.011405862856124303
+        },
+        {
+            "original_index": 568,
+            "is_outlier": true,
+            "if_score": -0.1276395893922641,
+            "final_cluster_label": 0,
+            "reconstruction_error": 0.007726541643117697
+        }
+    ],
+    "pipeline_status": "completed",
+    "pipeline_duration_seconds": 35.63,
+    "pipeline_end_time": "2025-05-25T16:48:01.498871"
+}

@@ -1,0 +1,10 @@
+{
+    "pipeline_start_time": "2025-05-16T16:46:36.684514",
+    "total_points_processed": 15,
+    "num_numerical_features_used": 4,
+    "pipeline_status": "failed",
+    "error_message": "name '_get_ae_artifact_path' is not defined",
+    "error_traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\HP\\OneDrive\\Desktop\\proejct_pfe\\fastapi-react-starter-main\\backend\\app\\services\\outlier_detection.py\", line 115, in run_pipeline\n    latent_features_save_path = _get_ae_artifact_path(self.ARTIFACT_BASE, self.dataset_id, self.user_id, \"latent_features.parquet\")\n                                ^^^^^^^^^^^^^^^^^^^^^\nNameError: name '_get_ae_artifact_path' is not defined\n",
+    "pipeline_duration_seconds": 21.61,
+    "pipeline_end_time": "2025-05-16T16:46:58.287904"
+}
