@@ -31,8 +31,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
 
     const formData = new FormData();
-    formData.append('file', file);
+    // Utiliser le nom original du fichier explicitement
+    formData.append('file', file, file.name);
     formData.append('file_type', fileType);
+    formData.append('original_filename', file.name);
 
     setUploading(true);
     onUploadStart();
@@ -79,23 +81,5 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       className={`
         border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
         transition-colors duration-200 ease-in-out
-        ${isDragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-500'}
-        ${uploading ? 'opacity-50 cursor-not-allowed' : ''}
-      `}
-    >
-      <input {...getInputProps()} disabled={uploading} />
-      <FaCloudUploadAlt className="mx-auto h-12 w-12 text-gray-400" />
-      <p className="mt-2 text-sm text-gray-600">
-        {isDragActive
-          ? 'Drop the file here...'
-          : 'Drag and drop a file here, or click to select'}
-      </p>
-      <p className="text-xs text-gray-500 mt-1">
-        Supported formats: csv, xlsx, xls, json, parquet, feather, tsv
-      </p>
-      <p className="text-xs text-gray-500">
-        Maximum file size: 500MB
-      </p>
-    </div>
-  );
-};
+        ${isDragActive ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-primary-500'}
+        ${uploading ? 'opacity-50 cursor-not-a

@@ -2,6 +2,8 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Plot from 'react-plotly.js';
 import { useAuth } from '@/context/AuthContext';
+import { useAppState } from '@/context/AppContext';
+
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -23,9 +25,16 @@ interface DiagnosisData {
   created_at: string;
   analysis: {
     missing_values: MissingValuesAnalysis;
-    duplicates: number;
-    categorical_issues: Record<string, any>;
-    summary_stats: Record<string, any>;
+duplicates: {
+  count: number;
+  details: Record<string, any>;
+};
+categorical_issues: Record<string, any>;
+summary_stats: Record<string, any>;
+data_types: Record<string, any>;
+id_columns: string[];
+type_issues: Record<string, any>;
+
   };
   visualizations: Array<{
     type: string;
@@ -35,6 +44,8 @@ interface DiagnosisData {
 }
 
 export const DiagnosisDashboard: React.FC = () => {
+const { theme } = useAppState();
+
   const { user, token } = useAuth();
   const { datasetId: routeDatasetId } = useParams<{ datasetId?: string }>();
   const navigate = useNavigate();
@@ -395,7 +406,8 @@ export const DiagnosisDashboard: React.FC = () => {
   if (!routeDatasetId) {
     return (
       <div className="flex-1 p-6">
-        <div className="bg-white rounded-lg shadow p-6 max-w-md mx-auto">
+<div className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-6 text-gray-900 dark:text-white">
+
           <h2 className="text-xl font-semibold mb-4">Select Dataset for Analysis</h2>
 
           {error && (
@@ -459,7 +471,8 @@ export const DiagnosisDashboard: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <div className="p-6">
+<div className="p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
           <strong>Error:</strong> {error}
         </div>
@@ -479,7 +492,8 @@ export const DiagnosisDashboard: React.FC = () => {
       {/* Main content */}
       <main className="p-6 space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow p-4">
+<div className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+
           <h1 className="text-2xl font-semibold text-gray-800">
             Analysis for {diagnosisData?.filename}
           </h1>
@@ -492,7 +506,8 @@ export const DiagnosisDashboard: React.FC = () => {
 
         {/* Quality metrics */}
         <section id="quality" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow p-4">
+<div className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+
             <h3 className="text-sm font-medium text-gray-500">Missing Values</h3>
             <p className="mt-2 text-3xl font-semibold text-gray-900">
               {diagnosisData?.analysis?.missing_values?.missing_percentage ? diagnosisData.analysis.missing_values.missing_percentage.toFixed(1) : '0'}%
@@ -502,14 +517,16 @@ export const DiagnosisDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-4">
-            <h3 className="text-sm font-medium text-gray-500">Duplicate Rows</h3>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">
-              {diagnosisData?.analysis?.duplicates || 0}
-            </p>
-          </div>
+<div className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+  <h3 className="text-sm font-medium text-gray-500">Duplicate Rows</h3>
+  <p className="mt-2 text-3xl font-semibold text-gray-900">
+    {diagnosisData?.analysis?.duplicates?.count || 0}
+  </p>
+</div>
 
-          <div className="bg-white rounded-lg shadow p-4">
+<div className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+
+
             <h3 className="text-sm font-medium text-gray-500">Categorical Columns</h3>
             <p className="mt-2 text-3xl font-semibold text-gray-900">
               {Object.keys(diagnosisData?.analysis?.categorical_issues || {}).length}
@@ -522,7 +539,8 @@ export const DiagnosisDashboard: React.FC = () => {
         </section>
 
         {/* Visualization Tabs */}
-        <div className="bg-white rounded-lg shadow">
+<div className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-6 text-gray-900 dark:text-white">
+
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8" aria-label="Tabs">
               <button
@@ -545,7 +563,8 @@ export const DiagnosisDashboard: React.FC = () => {
             <div className="p-4 space-y-6">
               {/* Missing Values */}
               {visualizations.missing && !visualizations.missing.error && visualizations.missing.plot && (
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
+<section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+
                   <h3 className="text-lg font-medium mb-4 text-gray-800">Missing Values Distribution</h3>
                   <Plot
                     data={visualizations.missing.plot.data}
@@ -565,7 +584,8 @@ export const DiagnosisDashboard: React.FC = () => {
                 </section>
               )}
               {visualizations.missing && visualizations.missing.error && (
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
+<section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+
                   <h3 className="text-lg font-medium mb-4 text-gray-800">Missing Values Distribution</h3>
                   <div className="p-4 bg-red-50 border border-red-200 rounded">
                     <p className="text-red-600">Error loading visualization: {visualizations.missing.error}</p>
@@ -574,28 +594,40 @@ export const DiagnosisDashboard: React.FC = () => {
               )}
 
               {/* Duplicates */}
-              {visualizations.duplicates && !visualizations.duplicates.error && visualizations.duplicates.plot && (
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
-                  <h3 className="text-lg font-medium mb-4 text-gray-800">Duplicate Rows Analysis</h3>
-                  <Plot
-                    data={visualizations.duplicates.plot.data}
-                    layout={{
-                      ...visualizations.duplicates.plot.layout,
-                      height: 400,
-                      margin: { t: 40, r: 20, b: 60, l: 60 },
-                      plot_bgcolor: '#fff',
-                      paper_bgcolor: '#fff',
-                    }}
-                    config={{
-                      responsive: true,
-                      displayModeBar: true
-                    }}
-                    className="w-full"
-                  />
-                </section>
-              )}
-              {visualizations.duplicates && visualizations.duplicates.error && (
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
+{visualizations.duplicates && !visualizations.duplicates.error && (
+  <section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+    <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">Duplicate Rows Analysis</h3>
+    
+    {/* Affiche le graphique circulaire s'il est disponible */}
+    {visualizations.duplicates.additional_plots && visualizations.duplicates.additional_plots.pie_chart ? (
+      <Plot
+        data={visualizations.duplicates.additional_plots.pie_chart.data}
+        layout={{
+          ...visualizations.duplicates.additional_plots.pie_chart.layout,
+          height: 400,
+          margin: { t: 40, r: 20, b: 60, l: 60 },
+          plot_bgcolor: '#fff',
+          paper_bgcolor: '#fff',
+        }}
+        config={{
+          responsive: true,
+          displayModeBar: true,
+        }}
+        className="w-full"
+      />
+    ) : (
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
+        <p className="text-yellow-600">Pie chart visualization not available</p>
+      </div>
+    )}
+  </section>
+)}
+{visualizations.duplicates && visualizations.duplicates.error && (
+  <section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+    {/* ici ton contenu pour le cas d'erreur */}
+  </section>
+)}
+
                   <h3 className="text-lg font-medium mb-4 text-gray-800">Duplicate Rows Analysis</h3>
                   <div className="p-4 bg-red-50 border border-red-200 rounded">
                     <p className="text-red-600">Error loading visualization: {visualizations.duplicates.error}</p>
@@ -605,7 +637,8 @@ export const DiagnosisDashboard: React.FC = () => {
 
               {/* Categorical */}
               {visualizations.categorical && !visualizations.categorical.error && visualizations.categorical.plot && (
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
+<section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+
                   <h3 className="text-lg font-medium mb-4 text-gray-800">Categorical Data Analysis</h3>
                   <Plot
                     data={visualizations.categorical.plot.data}
@@ -625,7 +658,8 @@ export const DiagnosisDashboard: React.FC = () => {
                 </section>
               )}
               {visualizations.categorical && visualizations.categorical.error && (
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
+<section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+
                   <h3 className="text-lg font-medium mb-4 text-gray-800">Categorical Data Analysis</h3>
                   <div className="p-4 bg-red-50 border border-red-200 rounded">
                     <p className="text-red-600">Error loading visualization: {visualizations.categorical.error}</p>
@@ -635,7 +669,8 @@ export const DiagnosisDashboard: React.FC = () => {
 
               {/* Outliers */}
               {visualizations.outliers && !visualizations.outliers.error && visualizations.outliers.plot && visualizations.outliers.plot.data && visualizations.outliers.plot.layout && (
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
+<section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-gray-900 dark:text-white">
+
                   <h3 className="text-lg font-medium mb-4 text-gray-800">Outlier Detection</h3>
                   <Plot
                     data={visualizations.outliers.plot.data}
@@ -662,7 +697,8 @@ export const DiagnosisDashboard: React.FC = () => {
             <div className="p-4 space-y-6">
               {/* Dataset Structure */}
               {visualizations.structure && (
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
+<section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-gray-900 dark:text-white">
+
                   <h3 className="text-lg font-medium mb-4 text-gray-800">Dataset Structure</h3>
                   {visualizations.structure.error ? (
                     <div className="p-4 bg-red-50 border border-red-200 rounded">
@@ -695,8 +731,10 @@ export const DiagnosisDashboard: React.FC = () => {
                         {visualizations.structure.stats && (
                           <div className="mt-4">
                             <h4 className="text-md font-medium text-gray-700">Dataset Information</h4>
-                            <div className="mt-2 grid grid-cols-2 gap-4">
-                              <div className="text-sm">
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
+                              <div className="text-center p-4">
+
                                 <p><span className="font-medium">Rows:</span> {visualizations.structure.stats.shape?.[0]}</p>
                                 <p><span className="font-medium">Columns:</span> {visualizations.structure.stats.shape?.[1]}</p>
                               </div>
