@@ -26,7 +26,6 @@ const createTools = (userId: string): Tool[] => [
     path: `/user/dashboard/${userId}/datasets`,
     description: 'Manage your uploaded datasets'
   },
-
   {
     id: 'diagnosis',
     name: 'Data Diagnosis',
@@ -84,9 +83,9 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({ children }) => {
     <div className="flex h-screen bg-gray-100">
       {/* Left Sidebar - Tool Navigation */}
       <div className="w-64 bg-white shadow-lg">
-          <div className="p-4 border-b">
-            <h2 className="text-lg font-semibold"> </h2>
-          </div>
+        <div className="p-4 border-b">
+          <h2 className="text-lg font-semibold">Tools</h2>
+        </div>
         <nav className="p-2">
           {tools.map((tool, index) => {
             const isActive = location.pathname.includes(tool.id);
@@ -97,10 +96,11 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({ children }) => {
                 )}
                 <Link
                   to={tool.path}
-                  className={`flex items-center space-x-3 px-3 py-3 rounded-md transition-colors ${isActive
-                    ? 'bg-primary-50 text-primary-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
+                  className={`flex items-center space-x-3 px-3 py-3 rounded-md transition-colors ${
+                    isActive
+                      ? 'bg-primary-50 text-primary-600'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <span className={`text-lg ${isActive ? 'text-primary-500' : 'text-gray-400'}`}>
                     {tool.icon}

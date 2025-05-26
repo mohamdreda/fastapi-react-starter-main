@@ -54,189 +54,87 @@ def read_data_file(file_path: str, file_type: str):
     return read_dataframe(Path(file_path), file_type)
 
 async def generate_missing_analysis(df) -> dict:
-    """Generate missing values visualization and stats using enhanced DataQualityAnalyzer"""
-    # Use the enhanced analyzer for comprehensive missing value detection
-    analyzer = DataQualityAnalyzer(df)
-    missing_analysis = analyzer.analyze_missing_values()
+
+    """Generate missing values visualization and stats"""
+    # Create a copy to avoid modifying the original dataframe
+    df_copy = df.copy()
     
-    # Ensure total_cells is present
-    if 'total_cells' not in missing_analysis:
-        # Calculate it if missing
-        total_cells = df.shape[0] * df.shape[1]
-        missing_analysis['total_cells'] = total_cells
+    # Convert 'NaN' strings to actual NaN values
+    for col in df_copy.columns:
+        if df_copy[col].dtype == 'object':
+            # Replace 'NaN', 'nan', 'NA', empty strings with NaN
+            if isinstance(df_copy, dd.DataFrame):
+                df_copy[col] = df_copy[col].map(lambda x: pd.NA if pd.isna(x) or 
+                                              (isinstance(x, str) and x.lower() in ['nan', 'na', '']) else x, 
+                                              meta=(col, df_copy[col].dtype))
+            else:
+                df_copy[col] = df_copy[col].replace(['nan', 'NaN', 'NA', ''], pd.NA)
+                df_copy[col] = df_copy[col].apply(lambda x: pd.NA if pd.isna(x) else x)
     
-    # Get a sample for visualization
-    if isinstance(df, dd.DataFrame):
-        sample_df = df.head(1000)
+    # Calculate missing values
+    if isinstance(df_copy, dd.DataFrame):
+        missing_by_column = df_copy.isnull().sum().compute()
+        total_missing = missing_by_column.sum()
+        total_cells = df_copy.size.compute()
+    else:
+        missing_by_column = df_copy.isnull().sum()
+        total_missing = missing_by_column.sum()
+        total_cells = df_copy.size
+    
+    missing_percentage = (total_missing / total_cells * 100) if total_cells > 0 else 0.0
+    
+    # Create missing values heatmap
+    if isinstance(df_copy, dd.DataFrame):
+        sample_df = df_copy.head(1000)
     else:
         # Handle case where dataset has fewer than 1000 rows
-        sample_size = min(1000, len(df))
-        sample_df = df.sample(n=sample_size) if sample_size > 0 else df
+        sample_size = min(1000, len(df_copy))
+        sample_df = df_copy.sample(n=sample_size) if sample_size > 0 else df_copy
     
-    # Apply the same missing value detection to the sample
-    sample_analyzer = DataQualityAnalyzer(sample_df)
-    sample_missing = sample_analyzer.analyze_missing_values()
+    # Create heatmap
+    fig = px.imshow(sample_df.isnull().T,
+                   title="Missing Values Distribution",
+                   color_continuous_scale='Viridis',
+                   labels=dict(x="Row Index", y="Column", color="Is Missing"))
     
-    # Create a DataFrame with missing values for visualization
-    # We need to recreate the sample with detected missing values
-    sample_copy = sample_df.copy()
+    # Create column-wise missing values bar chart
+    missing_pct = (missing_by_column / (df_copy.shape[0] if isinstance(df_copy, pd.DataFrame) else df_copy.shape[0].compute())) * 100
+    missing_pct = missing_pct.sort_values(ascending=False)
     
-    # Apply the comprehensive null detection to the sample
-    for col in sample_copy.columns:
-        # For object/string columns, check against string null indicators
-        if sample_copy[col].dtype == 'object':
-            # Create a mask for all string-based null indicators
-            null_mask = sample_copy[col].isin([ind for ind in NULL_INDICATORS if isinstance(ind, str)])
-            # Apply the mask by setting matching values to NaN
-            sample_copy.loc[null_mask, col] = np.nan
-        
-        # Try to convert to numeric to catch numeric null indicators
-        if sample_copy[col].dtype != 'datetime64[ns]':
-            try:
-                sample_copy[col] = pd.to_numeric(sample_copy[col], errors='coerce')
-            except Exception as e:
-                print(f"Error converting column {col} to numeric: {e}")
+    # Only include columns with missing values
+    missing_pct = missing_pct[missing_pct > 0]
     
-    # Create a more detailed heatmap visualization of missing values
-    # First create a binary missing values matrix for the sample
-    missing_matrix = sample_copy.isna().astype(int)
-    
-    # Create a heatmap of missing values
-    fig_heatmap = px.imshow(
-        missing_matrix.T,  # Transpose for better visualization
-        color_continuous_scale=["#4682B4", "#FF7F50"],
-        labels=dict(x="Row Index", y="Column", color="Missing"),
-        title="Missing Values Heatmap (Sample)"
-    )
-    
-    fig_heatmap.update_layout(
-        height=600,
-        width=900,
-        xaxis_title="Row Index (Sample)",
-        yaxis_title="Column",
-        coloraxis_showscale=True,
-        coloraxis_colorbar=dict(title="Missing")
-    )
-    
-    # Create a missing values pattern heatmap
-    # This shows patterns of missing values across columns
-    if len(df.columns) > 1:  # Only if we have multiple columns
-        try:
-            # Create a correlation matrix of missing value patterns
-            missing_corr = missing_matrix.corr()
-            
-            # Create a heatmap of missing value correlations
-            fig_pattern = px.imshow(
-                missing_corr,
-                color_continuous_scale="RdBu_r",
-                labels=dict(x="Column", y="Column", color="Correlation"),
-                title="Missing Values Pattern Correlation"
-            )
-            
-            fig_pattern.update_layout(
-                height=600,
-                width=600
-            )
-        except Exception as e:
-            # If there's an error, create a placeholder
-            fig_pattern = None
-    else:
-        fig_pattern = None
-    
-    # Create a bar chart of missing values by column
-    missing_counts = [missing_analysis['per_column'].get(col, {}).get('missing_count', 0) for col in df.columns]
-    missing_percentages = [missing_analysis['per_column'].get(col, {}).get('missing_percentage', 0) for col in df.columns]
-    
-    # Sort columns by missing percentage
-    sorted_indices = np.argsort(missing_percentages)[::-1]
-    sorted_columns = [df.columns[i] for i in sorted_indices]
-    sorted_percentages = [missing_percentages[i] for i in sorted_indices]
-    
-    # Filter out columns with no missing values
-    non_zero_indices = [i for i, p in enumerate(sorted_percentages) if p > 0]
-    plot_columns = [sorted_columns[i] for i in non_zero_indices]
-    plot_percentages = [sorted_percentages[i] for i in non_zero_indices]
-    
-    if plot_columns:
-        fig_bar = px.bar(
-            x=plot_columns,
-            y=plot_percentages,
-            labels={'x': 'Column', 'y': 'Missing (%)'},
+    if len(missing_pct) > 0:
+        fig2 = px.bar(
+            x=missing_pct.index.tolist(),
+            y=missing_pct.values.tolist(),
             title="Missing Values by Column (%)",
-            color_discrete_sequence=['#FF7F50']
+            labels={"x": "Column", "y": "Missing (%)"}
         )
-        
-        fig_bar.update_layout(
-            xaxis={'categoryorder': 'total descending'},
-            height=500,
-            width=800
-        )
-        
-        # Pie chart for overall missing vs. non-missing
-        total_missing = missing_analysis['total_missing']
-        total_cells = missing_analysis['total_cells']
-        
-        # Calculate exact percentages to ensure they sum to 100%
-        missing_pct = 100 * (total_missing / total_cells) if total_cells > 0 else 0
-        non_missing_pct = 100 - missing_pct  # This ensures they sum to exactly 100%
-        
-        fig_pie = px.pie(
-            values=[missing_pct, non_missing_pct],  # Use percentages directly
-            names=['Missing', 'Non-Missing'],
-            title=f"Overall Missing Values: {missing_pct:.2f}%",
-            color_discrete_sequence=['#FF7F50', '#4682B4']
-        )
+        fig2.update_layout(xaxis_tickangle=-45)
+    else:
+        # Create empty figure if no missing values
+        fig2 = go.Figure()
+        fig2.update_layout(title="No Missing Values Found")
     
-    # Create a table showing examples of missing values
-    examples_data = []
+    # Prepare per-column missing data
+    per_column_data = {}
+    for col, count in missing_by_column.items():
+        if count > 0:
+            per_column_data[col] = {
+                "count": int(count),
+                "percentage": round(float(missing_pct.get(col, 0)), 2)
+            }
     
-    for col, stats in missing_analysis['per_column'].items():
-        if 'examples' in stats and stats['examples']:
-            for example in stats['examples']:
-                examples_data.append({
-                    'Column': col,
-                    'Row Index': example['row_index'],
-                    'Original Value': example['original_value'],
-                    'Detected As': example['detected_as']
-                })
-    
-    fig_examples = None
-    if examples_data:
-        examples_df = pd.DataFrame(examples_data)
-        fig_examples = go.Figure(
-            data=[go.Table(
-                header=dict(
-                    values=list(examples_df.columns),
-                    fill_color='paleturquoise',
-                    align='left'
-                ),
-                cells=dict(
-                    values=[examples_df[col] for col in examples_df.columns],
-                    fill_color='lavender',
-                    align='left'
-                )
-            )]
-        )
-        fig_examples.update_layout(
-            title="Examples of Detected Missing Values"
-        )
-    
-    # Return in a format expected by the frontend
-    # The frontend expects a 'plot' property with 'data' and 'layout'
     return {
-        "plot": plotly_to_json(fig_pie),  # Use the pie chart as the main plot
-        "additional_plots": {
-            "bar_chart": plotly_to_json(fig_bar),
-            "examples_table": plotly_to_json(fig_examples) if fig_examples else None,
-            "heatmap": plotly_to_json(fig_heatmap),
-            "pattern_heatmap": plotly_to_json(fig_pattern) if fig_pattern else None
-        },
+        "plot": plotly_to_json(fig),
+        "column_plot": plotly_to_json(fig2),
         "stats": {
-            "total_missing": missing_analysis['total_missing'],
-            "missing_percentage": missing_analysis['missing_percentage'],
-            "missing_by_column": {col: stats for col, stats in missing_analysis['per_column'].items()},
-            "null_indicators_used": missing_analysis.get('null_indicators_used', []),
-            "null_indicators_checked": missing_analysis.get('null_indicators_checked', [])
+            "total_missing": int(total_missing),
+            "missing_percentage": round(missing_percentage, 2),
+            "total_cells": int(total_cells),
+            "per_column": per_column_data
+
         }
     }
 
@@ -696,6 +594,7 @@ async def generate_outlier_analysis(df) -> dict:
     if df.empty:
         return {"error": "Dataset is empty"}
         
+
     # Create a copy to avoid modifying the original dataframe
     df_copy = df.copy()
     
@@ -707,52 +606,55 @@ async def generate_outlier_analysis(df) -> dict:
     if not num_cols:
         return {"error": "No numerical columns found in the dataset"}
     
-    # Use the DataQualityAnalyzer to detect outliers
-    analyzer = DataQualityAnalyzer(df)
+# Use the DataQualityAnalyzer to detect outliers
+analyzer = DataQualityAnalyzer(df)
+
+outliers_data = {}
+plots = {}
+
+# Make a copy to filter extreme outliers for better visualization
+df_filtered = df_copy.copy()
+
+for col in num_cols:
+    # Calculate Q1, Q3 and IQR for the column
+    q1 = df_copy[col].quantile(0.25)
+    q3 = df_copy[col].quantile(0.75)
+    iqr = q3 - q1
     
-    outliers_data = {}
-    plots = {}
+    # Define outlier boundaries with a conservative 3*IQR range
+    lower_bound = q1 - 3 * iqr
+    upper_bound = q3 + 3 * iqr
     
-    # Filter out extreme outliers for better visualization
-    df_filtered = df_copy.copy()
+    # Identify outliers outside the boundaries
+    outliers = df_copy[(df_copy[col] < lower_bound) | (df_copy[col] > upper_bound)]
     
-    for col in num_cols:
-        # Calculate IQR and outlier boundaries
-        q1 = df_copy[col].quantile(0.25)
-        q3 = df_copy[col].quantile(0.75)
-        iqr = q3 - q1
-        lower_bound = q1 - 3 * iqr  # More conservative: 3 * IQR instead of 1.5 * IQR
-        upper_bound = q3 + 3 * iqr
+    if not outliers.empty:
+        # Compute percentage of outliers relative to dataset
+        outlier_percentage = len(outliers) / len(df_copy) * 100
         
-        # Identify outliers
-        outliers = df_copy[(df_copy[col] < lower_bound) | (df_copy[col] > upper_bound)]
+        # Save outlier info in dictionary
+        outliers_data[col] = {
+            'count': len(outliers),
+            'percentage': round(outlier_percentage, 2),
+            'min_value': float(df_copy[col].min()),
+            'max_value': float(df_copy[col].max()),
+            'lower_bound': float(lower_bound),
+            'upper_bound': float(upper_bound),
+            'examples': outliers[col].head(5).tolist()
+        }
         
-        if not outliers.empty:
-            # Store outlier information
-            outlier_percentage = len(outliers) / len(df_copy) * 100
-            # Use round() function instead of .round() method
-            outliers_data[col] = {
-                'count': len(outliers),
-                'percentage': round(outlier_percentage, 2),
-                'min_value': float(df_copy[col].min()),
-                'max_value': float(df_copy[col].max()),
-                'lower_bound': float(lower_bound),
-                'upper_bound': float(upper_bound),
-                'examples': outliers[col].head(5).tolist()
-            }
+        # Identify extreme outliers beyond 5*IQR for visualization adjustment
+        extreme_outliers = df_copy[(df_copy[col] < q1 - 5 * iqr) | (df_copy[col] > q3 + 5 * iqr)]
+        if not extreme_outliers.empty:
+            # Replace extreme outliers values in filtered df with boundary values
+            extreme_low_mask = df_filtered[col] < q1 - 5 * iqr
+            extreme_high_mask = df_filtered[col] > q3 + 5 * iqr
             
-            # Filter extreme outliers for visualization purposes
-            extreme_outliers = df_copy[(df_copy[col] < q1 - 5 * iqr) | (df_copy[col] > q3 + 5 * iqr)]
-            if not extreme_outliers.empty:
-                # Replace extreme outliers with boundary values for visualization only
-                extreme_low_mask = df_filtered[col] < q1 - 5 * iqr
-                extreme_high_mask = df_filtered[col] > q3 + 5 * iqr
-                
-                if extreme_low_mask.any():
-                    df_filtered.loc[extreme_low_mask, col] = q1 - 5 * iqr
-                if extreme_high_mask.any():
-                    df_filtered.loc[extreme_high_mask, col] = q3 + 5 * iqr
-    
+            if extreme_low_mask.any():
+                df_filtered.loc[extreme_low_mask, col] = q1 - 5 * iqr
+            if extreme_high_mask.any():
+                df_filtered.loc[extreme_high_mask, col] = q3 + 5 * iqr
+
     for col in num_cols:
         if isinstance(df_copy, dd.DataFrame):
             # For Dask DataFrames, compute the column first
@@ -969,18 +871,19 @@ async def generate_structure_analysis(df) -> dict:
     
     fig.update_layout(title="Dataset Structure")
     
-    # Convert numpy types to Python native types for JSON serialization
-    if isinstance(shape[0], np.integer):
-        shape = (int(shape[0]), int(shape[1]))
-    
-    if memory_usage is not None and isinstance(memory_usage, np.integer):
-        memory_usage = int(memory_usage)
-    
+# Convert numpy integer types to native Python int for JSON serialization
+if isinstance(shape[0], np.integer):
+    shape = (int(shape[0]), int(shape[1]))
+
+if memory_usage is not None and isinstance(memory_usage, np.integer):
+    memory_usage = int(memory_usage)
+
     return {
         "plot": plotly_to_json(fig),
         "stats": {
             "shape": shape,
-            "columns": int(len(df.columns)),
+"columns": int(len(df.columns)),
+
             "memory_usage": memory_usage,
             "columns_info": columns_info
         }
@@ -994,11 +897,19 @@ async def generate_distribution_analysis(df) -> dict:
     
     distributions = {}
     histograms = {}
-    bar_charts = {}
-    pie_charts = {}
+bar_charts = {}
+pie_charts = {}
+
+# Process numerical columns - create histograms for first 5 numerical columns
+for col in num_cols[:5]:
+    # Ici, on pourrait générer un histogramme ou autre type de graphique pour chaque col
+    bar_charts[col] = create_histogram(df[col])  # Exemple de fonction à définir
     
-    # Process numerical columns - create histograms for all numerical columns
-    for col in num_cols[:5]:  # Limit to first 5 columns for performance
+# Ensuite, si tu veux sélectionner la première colonne numérique pour une analyse plus détaillée :
+if num_cols:
+    col = num_cols[0]
+    # Code d’analyse plus détaillée ou visualisation pour cette colonne
+
         if isinstance(df, dd.DataFrame):
             sample_df = df.head(10000)
             values = sample_df[col].dropna().values
@@ -1008,154 +919,192 @@ async def generate_distribution_analysis(df) -> dict:
             values = sample_df[col].dropna().values
         
         if len(values) > 0:
-            # Create enhanced histogram with multiple visualization options
-            fig = px.histogram(
-                sample_df, x=col,
-                title=f"Distribution of {col}",
-                marginal="box",  # Add a box plot on the margins
-                histnorm="probability density",  # Normalize to show probability density
-                color_discrete_sequence=['#4682B4']
-            )
-            
-            # Add KDE (Kernel Density Estimate) curve
-            try:
-                kde = stats.gaussian_kde(values)
-                x_range = np.linspace(min(values), max(values), 1000)
-                y_kde = kde(x_range)
-                fig.add_trace(go.Scatter(
-                    x=x_range, y=y_kde,
-                    mode='lines', name='KDE',
-                    line=dict(color='#FF7F50', width=2)
-                ))
-            except Exception as e:
-                # Skip KDE if there's an error (e.g., all values are identical)
-                pass
-            
-            # Add mean and median lines
-            mean_val = np.mean(values)
-            median_val = np.median(values)
-            
-            fig.add_vline(x=mean_val, line_dash="dash", line_color="red",
-                         annotation_text=f"Mean: {mean_val:.2f}", annotation_position="top right")
-            fig.add_vline(x=median_val, line_dash="dash", line_color="green",
-                         annotation_text=f"Median: {median_val:.2f}", annotation_position="top left")
-            
-            fig.update_layout(
-                height=500,
-                width=800,
-                xaxis_title=col,
-                yaxis_title="Density",
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-            )
-            
-            histograms[col] = plotly_to_json(fig)
-            
-            # Calculate comprehensive distribution statistics
+// Create enhanced histogram with multiple visualization options
+fig = px.histogram(
+    sample_df, 
+    x=col,
+    title=`Distribution of ${col}`,
+    marginal="box",               // Add a box plot on the margins
+    histnorm="probability density", // Normalize to show probability density
+    color_discrete_sequence=['#4682B4']
+);
+
+try {
+    // Compute KDE using scipy.stats.gaussian_kde
+    kde = stats.gaussian_kde(values);
+    x_range = np.linspace(Math.min(...values), Math.max(...values), 1000);
+    y_kde = kde(x_range);
+    fig.add_trace(go.Scatter({
+        x: x_range,
+        y: y_kde,
+        mode: 'lines',
+        name: 'KDE',
+        line: {color: '#FF7F50', width: 2}
+    }));
+} catch (e) {
+    // Skip KDE if error (e.g. identical values)
+}
+
+const mean_val = np.mean(values);
+const median_val = np.median(values);
+
+fig.add_vline({
+    x: mean_val,
+    line_dash: "dash",
+    line_color: "red",
+    annotation_text: `Mean: ${mean_val.toFixed(2)}`,
+    annotation_position: "top right"
+});
+fig.add_vline({
+    x: median_val,
+    line_dash: "dash",
+    line_color: "green",
+    annotation_text: `Median: ${median_val.toFixed(2)}`,
+    annotation_position: "top left"
+});
+
+fig.update_layout({
+    height: 500,
+    width: 800,
+    xaxis_title: col,
+    yaxis_title: "Density",
+    legend: {
+        orientation: "h",
+        yanchor: "bottom",
+        y: 1.02,
+        xanchor: "right",
+        x: 1
+    }
+});
+
+histograms[col] = plotly_to_json(fig);
+
             distributions[col] = {
                 "mean": float(np.mean(values)),
                 "median": float(np.median(values)),
                 "std": float(np.std(values)),
                 "min": float(np.min(values)),
                 "max": float(np.max(values)),
-                "q1": float(np.percentile(values, 25)),
-                "q3": float(np.percentile(values, 75)),
-                "iqr": float(np.percentile(values, 75) - np.percentile(values, 25)),
-                "skewness": float(stats.skew(values)) if len(values) > 2 else None,
-                "kurtosis": float(stats.kurtosis(values)) if len(values) > 2 else None,
-                "normality": float(stats.normaltest(values)[0]) if len(values) > 8 else None
-            }
+# Process numerical columns - extended statistics
+num_distributions = {}
+histograms = {}
+
+for col in num_cols[:5]:  # Limit to first 5 columns for performance
+    if isinstance(df, dd.DataFrame):
+        sample_df = df.head(10000)
+        values = sample_df[col].dropna().to_numpy()
+    else:
+        sample_size = min(10000, len(df))
+        sample_df = df.sample(n=sample_size) if sample_size > 0 else df
+        values = sample_df[col].dropna().to_numpy()
     
-    # Process categorical columns - create bar charts and pie charts
-    cat_distributions = {}
-    
-    for col in cat_cols[:5]:  # Limit to first 5 columns for performance
-        if isinstance(df, dd.DataFrame):
-            sample_df = df.head(10000)
-            value_counts = sample_df[col].value_counts().compute().head(20)
-        else:
-            sample_size = min(10000, len(df))
-            sample_df = df.sample(n=sample_size) if sample_size > 0 else df
-            value_counts = sample_df[col].value_counts().head(20)
+    if len(values) > 0:
+        # Create enhanced histogram with KDE, mean, median lines (code as given before)
+        # ... [histogram creation code here, as in previous snippet] ...
         
-        if not value_counts.empty:
-            # Calculate percentages for each category
-            total = value_counts.sum()
-            percentages = [(count / total * 100) for count in value_counts.values]
-            
-            # Create enhanced bar chart with percentages
-            fig_bar = go.Figure()
-            
-            # Add bars for counts
-            fig_bar.add_trace(go.Bar(
-                x=value_counts.index,
-                y=value_counts.values,
-                name="Count",
-                marker_color='#4682B4'
-            ))
-            
-            # Add line for percentages
-            fig_bar.add_trace(go.Scatter(
-                x=value_counts.index,
-                y=percentages,
-                name="Percentage",
-                yaxis="y2",
-                mode="lines+markers",
-                marker=dict(color='#FF7F50', size=8),
-                line=dict(color='#FF7F50', width=2)
-            ))
-            
-            fig_bar.update_layout(
-                title=f"Distribution of {col}",
-                xaxis_title=col,
-                yaxis_title="Count",
-                yaxis2=dict(
-                    title="Percentage (%)",
-                    overlaying="y",
-                    side="right",
-                    range=[0, max(percentages) * 1.1]
-                ),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                height=500,
-                width=800,
-                xaxis_tickangle=-45
-            )
-            
-            bar_charts[col] = plotly_to_json(fig_bar)
-            
-            # Create pie chart for categorical distribution
-            fig_pie = px.pie(
-                values=value_counts.values,
-                names=value_counts.index,
-                title=f"Proportion of Categories in {col}",
-                hole=0.4,  # Create a donut chart
-                color_discrete_sequence=px.colors.qualitative.Pastel
-            )
-            
-            fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-            fig_pie.update_layout(
-                height=500,
-                width=500,
-                showlegend=False if len(value_counts) > 10 else True
-            )
-            
-            pie_charts[col] = plotly_to_json(fig_pie)
-            
-            # Calculate comprehensive distribution statistics
-            cat_distributions[col] = {
-                "unique_values": int(len(value_counts)),
-                "most_common": str(value_counts.index[0]) if len(value_counts) > 0 else None,
-                "most_common_count": int(value_counts.iloc[0]) if len(value_counts) > 0 else 0,
-                "most_common_percentage": float(percentages[0]) if len(percentages) > 0 else 0,
-                "entropy": float(stats.entropy(value_counts.values)) if len(value_counts) > 1 else 0,
-                "top_5_categories": [str(x) for x in value_counts.index[:5].tolist()],
-                "top_5_counts": [int(x) for x in value_counts.values[:5].tolist()]
-            }
+        # Calculate comprehensive distribution statistics
+        num_distributions[col] = {
+            "count": len(values),
+            "mean": float(np.mean(values)),
+            "median": float(np.median(values)),
+            "std_dev": float(np.std(values, ddof=1)),
+            "min": float(np.min(values)),
+            "max": float(np.max(values)),
+            "q1": float(np.percentile(values, 25)),
+            "q3": float(np.percentile(values, 75)),
+            "iqr": float(np.percentile(values, 75) - np.percentile(values, 25)),
+            "skewness": float(stats.skew(values)) if len(values) > 2 else None,
+            "kurtosis": float(stats.kurtosis(values)) if len(values) > 2 else None,
+            "normality": float(stats.normaltest(values)[0]) if len(values) > 8 else None
+        }
+
+# Process categorical columns - bar + pie charts + statistics
+cat_distributions = {}
+bar_charts = {}
+pie_charts = {}
+
+for col in cat_cols[:5]:  # Limit to first 5 columns for performance
+    if isinstance(df, dd.DataFrame):
+        sample_df = df.head(10000)
+        value_counts = sample_df[col].value_counts().compute().head(20)
+    else:
+        sample_size = min(10000, len(df))
+        sample_df = df.sample(n=sample_size) if sample_size > 0 else df
+        value_counts = sample_df[col].value_counts().head(20)
+
+    if not value_counts.empty:
+        total = value_counts.sum()
+        percentages = [(count / total * 100) for count in value_counts.values]
+
+        # Bar chart with counts and percentages
+        fig_bar = go.Figure()
+        fig_bar.add_trace(go.Bar(
+            x=value_counts.index,
+            y=value_counts.values,
+            name="Count",
+            marker_color='#4682B4'
+        ))
+        fig_bar.add_trace(go.Scatter(
+            x=value_counts.index,
+            y=percentages,
+            name="Percentage",
+            yaxis="y2",
+            mode="lines+markers",
+            marker=dict(color='#FF7F50', size=8),
+            line=dict(color='#FF7F50', width=2)
+        ))
+        fig_bar.update_layout(
+            title=f"Distribution of {col}",
+            xaxis_title=col,
+            yaxis_title="Count",
+            yaxis2=dict(
+                title="Percentage (%)",
+                overlaying="y",
+                side="right",
+                range=[0, max(percentages) * 1.1]
+            ),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            height=500,
+            width=800,
+            xaxis_tickangle=-45
+        )
+        bar_charts[col] = plotly_to_json(fig_bar)
+
+        # Pie chart for category proportions
+        fig_pie = px.pie(
+            values=value_counts.values,
+            names=value_counts.index,
+            title=f"Proportion of Categories in {col}",
+            hole=0.4,
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+        fig_pie.update_layout(
+            height=500,
+            width=500,
+            showlegend=False if len(value_counts) > 10 else True
+        )
+        pie_charts[col] = plotly_to_json(fig_pie)
+
+        # Calculate comprehensive distribution statistics
+        cat_distributions[col] = {
+            "unique_values": int(len(value_counts)),
+            "most_common": str(value_counts.index[0]) if len(value_counts) > 0 else None,
+            "most_common_count": int(value_counts.iloc[0]) if len(value_counts) > 0 else 0,
+            "most_common_percentage": float(percentages[0]) if len(percentages) > 0 else 0,
+            "entropy": float(stats.entropy(value_counts.values)) if len(value_counts) > 1 else 0,
+            "top_5_categories": [str(x) for x in value_counts.index[:5].tolist()],
+            "top_5_counts": [int(x) for x in value_counts.values[:5].tolist()]
+        }
+
     
     return {
         "plots": {
             "histograms": histograms,
+
             "bar_charts": bar_charts,
             "pie_charts": pie_charts
+
         },
         "stats": {
             "numerical_distributions": distributions,
@@ -1166,6 +1115,7 @@ async def generate_distribution_analysis(df) -> dict:
     }
 
 async def generate_correlation_analysis(df) -> dict:
+
     """Generate correlation matrix for numerical columns with outlier handling"""
     if df.empty:
         return {"error": "Dataset is empty"}
@@ -1280,6 +1230,7 @@ async def generate_correlation_analysis(df) -> dict:
     )
     
     # Find strongest correlations (using filtered data)
+
     corr_values = corr_matrix.unstack()
     # Remove self-correlations
     corr_values = corr_values[corr_values < 1.0]
@@ -1323,16 +1274,18 @@ async def generate_summary_statistics(df) -> dict:
         # Basic statistics
         if isinstance(df, dd.DataFrame):
             sample_df = df.head(10000)
-            num_rows = int(df.shape[0].compute())
-            num_cols = int(df.shape[1])
-            missing_values = int(df.isnull().sum().sum().compute())
-            duplicate_rows = int(df.duplicated().sum().compute())
-        else:
-            sample_df = df
-            num_rows = int(len(df))
-            num_cols = int(len(df.columns))
-            missing_values = int(df.isnull().sum().sum())
-            duplicate_rows = int(df.duplicated().sum())
+if isinstance(df, dd.DataFrame):
+    num_rows = int(df.shape[0].compute())
+    num_cols = int(df.shape[1])
+    missing_values = int(df.isnull().sum().sum().compute())
+    duplicate_rows = int(df.duplicated().sum().compute())
+else:
+    sample_df = df
+    num_rows = int(len(df))
+    num_cols = int(len(df.columns))
+    missing_values = int(df.isnull().sum().sum())
+    duplicate_rows = int(df.duplicated().sum())
+
         
         # Get numerical and categorical columns
         num_cols = sample_df.select_dtypes(include=np.number).columns.tolist()

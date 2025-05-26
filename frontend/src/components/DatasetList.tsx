@@ -133,24 +133,22 @@ export const DatasetList: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center space-x-2">
-                          <div className="flex items-center space-x-2">
-                            <Link
-                              to={`/dashboard/diagnosis/${dataset.id}`}
-                              className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
-                              title="Analyze Dataset"
-                            >
-                              <FaSpinner className="w-4 h-4 mr-1" />
-                              Analyze
-                            </Link>
-                            <button
-                              onClick={() => handleDelete(dataset.id)}
-                              className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                              title="Delete Dataset"
-                            >
-                              <FaSpinner className="w-4 h-4 mr-1" />
-                              Delete
-                            </button>
-                          </div>
+                          <Link
+                            to={`/dashboard/diagnosis/${dataset.id}`}
+                            className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
+                            title="Analyze Dataset"
+                          >
+                            <FaSpinner className="w-4 h-4 mr-1" />
+                            Analyze
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(dataset.id)}
+                            className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                            title="Delete Dataset"
+                          >
+                            <FaSpinner className="w-4 h-4 mr-1" />
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>

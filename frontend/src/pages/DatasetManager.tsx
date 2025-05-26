@@ -36,6 +36,9 @@ export const DatasetManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedDatasetId, setSelectedDatasetId] = useState<number | null>(null);
+
   const { userId } = useParams();
   const navigate = useNavigate();
   const { token } = useAuth();
@@ -84,10 +87,7 @@ export const DatasetManager: React.FC = () => {
     setUploading(false);
   };
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedDatasetId, setSelectedDatasetId] = useState<number | null>(null);
-
-  const handleDelete = async (datasetId: number) => {
+  const handleDelete = (datasetId: number) => {
     setSelectedDatasetId(datasetId);
     setDeleteDialogOpen(true);
   };
@@ -203,6 +203,7 @@ export const DatasetManager: React.FC = () => {
           </div>
         )}
       </div>
+
       <ConfirmationDialog
         open={deleteDialogOpen}
         onClose={() => {

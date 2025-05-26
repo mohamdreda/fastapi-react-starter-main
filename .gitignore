@@ -21,6 +21,8 @@ wheels/
 .env
 venv/
 .venv/
+uploads/
+data_artifacts/
 
 # Node
 node_modules/
@@ -102,5 +104,6 @@ temp/
 *.key
 *.crt
 *.cert
-"uploads/2/20250502_111713_large_data.csv" 
-/uploads/
+uploads/2/20250502_111713_large_data.csv
+
+"uploads/2/20250509_220253_large_data.csv" 

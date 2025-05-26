@@ -1,0 +1,16 @@
+record_num,value_a,value_b,value_c,category,notes
+101,5.5,10.2,15.5,X,First group
+102,5.1,10.5,15.2,X,First group
+103,5.3,9.9,15.8,X,First group
+104,5.6,10.1,15.3,X,First group
+105,4.9,10.3,15.1,X,First group
+106,15.2,20.3,25.5,Y,Second group
+107,14.8,19.8,25.2,Y,Second group
+108,15.5,20.1,24.9,Y,Second group
+109,15.1,20.5,25.7,Y,Second group
+110,14.9,19.9,25.0,Y,Second group
+111,5.2,10.0,15.4,X,Back to first
+112,15.3,20.0,25.3,Y,More of second
+113,25.0,30.0,35.0,Z,Third group subtle outlier
+114,5.4,10.4,15.6,X,More of first
+115,15.0,20.2,25.1,Y,Consistent second

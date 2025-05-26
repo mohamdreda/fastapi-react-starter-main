@@ -3,14 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.db.models import Dataset, User
 from app.services.visualization import generate_visualizations
-from app.services.data_quality import DataQualityAnalyzer
-from app.services.upload import read_dataframe
 from app.dependencies import get_current_user
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 import os
-import json
 import pandas as pd
-from pathlib import Path
 
 router = APIRouter()
 
@@ -30,7 +26,6 @@ def convert_missing_values(data: Dict[str, Any]) -> Dict[str, Any]:
 @router.get("/{dataset_id}")
 async def get_diagnosis_data(
     dataset_id: int,
-    refresh: bool = False,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -38,56 +33,15 @@ async def get_diagnosis_data(
     dataset = await db.get(Dataset, dataset_id)
     if not dataset or dataset.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Dataset not found")
-    
-    # If refresh is requested, reanalyze the dataset with the enhanced analyzer
-    if refresh and os.path.exists(dataset.file_path):
-        try:
-            # Read the file
-            df = read_dataframe(Path(dataset.file_path), dataset.file_type)
-            
-            # Use the enhanced data quality analyzer
-            analyzer = DataQualityAnalyzer(df)
-            analysis_results = analyzer.get_full_analysis()
-            
-            # Update the dataset with new analysis
-            dataset.missing_values = json.dumps(analysis_results['missing_values'])
-            dataset.duplicates = analysis_results['duplicates']['duplicate_count']
-            dataset.data_types = json.dumps(analysis_results['data_types']['column_types'])
-            dataset.categorical_issues = json.dumps(analysis_results['categorical_consistency'])
-            dataset.analysis_metadata = json.dumps({
-                'id_columns': analysis_results['id_columns'],
-                'duplicate_details': analysis_results['duplicates'],
-                'type_issues': analysis_results['data_types']['type_issues']
-            })
-            
-            await db.commit()
-        except Exception as e:
-            # Log error but continue with existing data
-            print(f"Error refreshing analysis: {str(e)}")
-    
-    # Parse JSON fields
-    missing_values = json.loads(dataset.missing_values) if dataset.missing_values else {}
-    categorical_issues = json.loads(dataset.categorical_issues) if dataset.categorical_issues else {}
-    summary_stats = json.loads(dataset.summary_stats) if dataset.summary_stats else {}
-    data_types = json.loads(dataset.data_types) if dataset.data_types else {}
-    metadata = json.loads(dataset.analysis_metadata) if dataset.analysis_metadata else {}
-    
-    # Enhanced response with detailed information
+
     return {
         "id": dataset.id,
         "filename": dataset.filename,
-        "file_type": dataset.file_type,
         "analysis": {
-            "missing_values": convert_missing_values(missing_values),
-            "duplicates": {
-                "count": dataset.duplicates or 0,
-                "details": metadata.get('duplicate_details', {})
-            },
-            "categorical_issues": categorical_issues,
-            "summary_stats": summary_stats,
-            "data_types": data_types,
-            "id_columns": metadata.get('id_columns', []),
-            "type_issues": metadata.get('type_issues', {})
+            "missing_values": convert_missing_values(dataset.missing_values or {}),
+            "duplicates": dataset.duplicates or 0,
+            "categorical_issues": dataset.categorical_issues or {},
+            "summary_stats": dataset.summary_stats or {}
         },
         "visualizations": [
             # Basic visualizations

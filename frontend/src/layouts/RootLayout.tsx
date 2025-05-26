@@ -7,8 +7,6 @@ import { Button } from '../components/ui/Button'
 
 const publicNavLinks = [] as const
 
-// Dashboard link will be dynamically generated based on user role
-
 function Navigation() {
   const navigate = useNavigate()
   const { isAuthenticated, logout, user } = useAuth()
@@ -69,11 +67,11 @@ export default function RootLayout() {
       <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
         <Navigation />
         <div className="flex-1 overflow-auto">
-        <main className="w-full h-full p-6">
-          <Outlet />
-        </main>
-      </div>
-      <footer className="bg-white dark:bg-gray-800 shadow-sm transition-colors">
+          <main className="w-full h-full p-6">
+            <Outlet />
+          </main>
+        </div>
+        <footer className="bg-white dark:bg-gray-800 shadow-sm transition-colors">
           <div className="container mx-auto px-6 py-4">
             <p className="text-center text-gray-500 dark:text-gray-400">
               {currentYear} FastAPI React Starter. All rights reserved.

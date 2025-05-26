@@ -1,0 +1,11 @@
+{
+    "algorithm": "DBSCAN",
+    "params": {
+        "eps": 0.5,
+        "min_samples": 2,
+        "metric": "euclidean"
+    },
+    "num_clusters_found": 1,
+    "num_noise_points": 1,
+    "labels_path": "data_artifacts\\outliers\\user_2\\dataset_15\\clustering\\cluster_labels.parquet"
+}

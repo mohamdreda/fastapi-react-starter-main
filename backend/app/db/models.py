@@ -56,7 +56,6 @@ class Dataset(Base):
     data_types = Column(JSON, nullable=True)  # JSON object with column data types
     categorical_issues = Column(JSON, nullable=True)  # JSON object with categorical issues
     summary_stats = Column(JSON, nullable=True)  # JSON object with summary statistics
-    analysis_metadata = Column(JSON, nullable=True)  # Additional metadata from enhanced data quality analysis
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.utcnow) 
     user_id = Column(Integer, ForeignKey("users.id"))

@@ -62,17 +62,20 @@ export default function UserDashboard() {
 
   return (
     <GalaxyLayout>
-      <div className="min-h-screen flex flex-col"> {/* Make sure to use flex and min-h-screen */}
+      <div className="min-h-screen flex flex-col">
         <Routes>
           {/* Show welcome screen at root */}
           <Route index element={<WelcomeDashboard />} />
 
+          {/* Tool routes */}
           <Route path="datasets" element={<DatasetManager />} />
+
           <Route path="diagnosis">
             <Route index element={<DiagnosisDashboard />} />
             <Route path=":datasetId" element={<DiagnosisDashboard />} />
             <Route path="outliers" element={<Outliers />} />
           </Route>
+
           <Route path="imputation" element={<Imputation />} />
           <Route path="duplicates" element={<Duplicates />} />
           <Route path="export" element={<Export />} />
