@@ -51,7 +51,7 @@ function RegisterFormContent() {
         title: 'Registration successful!',
         description: 'Your account has been created.',
       })
-      navigate('/dashboard')
+      navigate('/login')
     } else {
       setError(result.error || 'An error occurred during registration')
       toast({

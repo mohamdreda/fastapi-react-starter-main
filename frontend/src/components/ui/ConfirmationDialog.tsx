@@ -15,7 +15,12 @@ interface ConfirmationDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   title?: string;
-  message?: string;
+  message?: string | React.ReactNode;
+  confirmButtonText?: string;
+  cancelButtonText?: string;
+  confirmButtonDisabled?: boolean;
+  cancelButtonDisabled?: boolean;
+  confirmButtonColor?: 'primary' | 'secondary' | 'error' | 'success' | 'info' | 'warning';
 }
 
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
@@ -24,6 +29,11 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   onConfirm,
   title = 'Confirm Deletion',
   message = 'This action cannot be undone.',
+  confirmButtonText = 'Confirm',
+  cancelButtonText = 'Cancel',
+  confirmButtonDisabled = false,
+  cancelButtonDisabled = false,
+  confirmButtonColor = 'primary',
 }) => {
   return (
     <Dialog
@@ -40,9 +50,9 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       maxWidth="xs"
       fullWidth
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+      <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, p: 2 }}>
         <WarningIcon color="error" sx={{ fontSize: 24 }} />
-        <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           {title}
         </Typography>
       </DialogTitle>
@@ -56,6 +66,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           variant="outlined"
           color="inherit"
           onClick={onClose}
+          disabled={cancelButtonDisabled}
           sx={{
             textTransform: 'none',
             borderRadius: 2,
@@ -63,23 +74,31 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
             '&:hover': {
               backgroundColor: 'rgba(0, 0, 0, 0.04)',
             },
+            '&.Mui-disabled': {
+              opacity: 0.7,
+            },
           }}
         >
-          Cancel
+          {cancelButtonText}
         </Button>
         <Button
           variant="contained"
-          color="error"
+          color={confirmButtonColor}
           onClick={onConfirm}
+          disabled={confirmButtonDisabled}
           sx={{
             textTransform: 'none',
             borderRadius: 2,
             '&:hover': {
-              backgroundColor: 'error.dark',
+              backgroundColor: `${confirmButtonColor}.dark`,
+            },
+            '&.Mui-disabled': {
+              backgroundColor: `${confirmButtonColor}.light`,
+              color: 'text.disabled',
             },
           }}
         >
-          Delete
+          {confirmButtonText}
         </Button>
       </DialogActions>
     </Dialog>

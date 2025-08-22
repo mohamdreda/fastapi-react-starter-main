@@ -2,6 +2,10 @@ import { createContext, useContext, useReducer, ReactNode, Dispatch } from 'reac
 import { AppState, Theme, NotificationType } from '../types'
 import { AuthProvider } from './AuthContext'
 
+// Contexts must be declared before being used in the provider
+const AppContext = createContext<AppState | null>(null)
+const AppDispatchContext = createContext<Dispatch<Action> | null>(null)
+
 // Action types
 export const ACTIONS = {
   SET_THEME: 'SET_THEME',
@@ -171,6 +175,3 @@ export function setUserPreferences(
     payload: preferences,
   })
 }
-
-const AppContext = createContext<AppState | null>(null)
-const AppDispatchContext = createContext<Dispatch<Action> | null>(null)

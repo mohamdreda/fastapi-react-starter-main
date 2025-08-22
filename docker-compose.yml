@@ -16,6 +16,12 @@ services:
       retries: 5
       start_period: 10s
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
   backend:
     build: ./backend
     ports:
@@ -28,18 +34,55 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - DB_HOST=postgres
       - DB_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - CORS_ORIGINS=["http://localhost:5173"]
       - ENVIRONMENT=development
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
-    command: bash -c "python manage.py run"
+    command: ["python", "manage.py", "run"]
+
+  celery_worker:
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    environment:
+      - DB_NAME=${DB_NAME:-fastapi_db}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - ENVIRONMENT=development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: ["celery", "-A", "app.celery_app.celery_app", "worker", "-l", "INFO"]
+
+  celery_beat:
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - ENVIRONMENT=development
+    depends_on:
+      redis:
+        condition: service_started
+    command: ["celery", "-A", "app.celery_app.celery_app", "beat", "-l", "INFO"]
 
   frontend:
     build:

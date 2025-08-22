@@ -51,6 +51,9 @@ NULL_INDICATORS = [
     'no data', 'NO DATA', 'No Data'
 ]
 
+# Generate a list of ONLY string-based null indicators for safer comparisons
+NULL_STRING_INDICATORS = [ind.lower() for ind in NULL_INDICATORS if isinstance(ind, str) and ind.strip() != '']
+
 # Regex patterns for identifying ID-like columns
 ID_COLUMN_PATTERNS = [
     r'(?i)^id$', r'(?i).*_id$', r'(?i)^.*id$', r'(?i)^.*_key$',
@@ -110,7 +113,7 @@ class DataQualityAnalyzer:
     
     def analyze_missing_values(self) -> Dict[str, Any]:
         """Detect missing values in the dataset using comprehensive null indicators"""
-        df_sample = self._get_sample()
+        df_sample = self._get_sample().reset_index(drop=True)
         
         # Create a copy for analysis
         df_copy = df_sample.copy()
@@ -188,7 +191,7 @@ class DataQualityAnalyzer:
                     elif isinstance(orig_value, str):
                         if orig_value.strip() == '':
                             detected_as = 'Empty string'
-                        elif orig_value in NULL_INDICATORS:
+                        elif orig_value.strip().lower() in NULL_STRING_INDICATORS:
                             detected_as = f'Null indicator: {orig_value}'
                     
                     examples.append({
@@ -248,7 +251,7 @@ class DataQualityAnalyzer:
         - exclude_id_columns: Whether to exclude ID-like columns from comparison
         - similarity_threshold: Threshold for fuzzy matching (0.0-1.0)
         """
-        df_sample = self._get_sample()
+        df_sample = self._get_sample().reset_index(drop=True)
         
         # Determine columns to check
         columns_to_check = list(df_sample.columns)
@@ -316,7 +319,7 @@ class DataQualityAnalyzer:
                 from rapidfuzz import fuzz
                 
                 # Convert dataframe to list of tuples for faster comparison
-                records = df_normalized.to_dict('records')
+                records = df_normalized.to_dict('records')  # Index now positional
                 record_strings = [str(r) for r in records]
                 
                 # Compare each record with others (excluding already identified exact duplicates)
@@ -350,7 +353,12 @@ class DataQualityAnalyzer:
                 
                 # Find all rows with these values
                 matches = df_normalized.loc[(df_normalized == dup_values).all(axis=1)].index.tolist()
-                original_idx = min(matches)  # Assume the first occurrence is the original
+                # Check if matches is empty before finding minimum
+                if matches:
+                    original_idx = min(matches)  # Assume the first occurrence is the original
+                else:
+                    # Skip this duplicate if no matches found
+                    continue
                 
                 if original_idx != dup_idx:  # Ensure we're not comparing a row to itself
                     examples.append({
@@ -363,15 +371,17 @@ class DataQualityAnalyzer:
                     })
         
         # Then add near-duplicates
-        for idx1, idx2, similarity in near_duplicate_pairs[:min(5, len(near_duplicate_pairs))]:
-            examples.append({
-                'original_index': int(idx1),
-                'duplicate_index': int(idx2),
-                'original_row': df_sample.loc[idx1].to_dict(),
-                'duplicate_row': df_sample.loc[idx2].to_dict(),
-                'type': 'near',
-                'similarity': float(similarity)
-            })
+        # Check if near_duplicate_pairs is not empty before processing
+        if near_duplicate_pairs:
+            for idx1, idx2, similarity in near_duplicate_pairs[:min(5, len(near_duplicate_pairs))]:
+                examples.append({
+                    'original_index': int(idx1),
+                    'duplicate_index': int(idx2),
+                    'original_row': df_sample.loc[idx1].to_dict(),
+                    'duplicate_row': df_sample.loc[idx2].to_dict(),
+                    'type': 'near',
+                    'similarity': float(similarity)
+                })
         
         # Extrapolate to full dataset
         if self.is_dask:
@@ -659,7 +669,7 @@ class DataQualityAnalyzer:
     
     def analyze_data_types(self) -> Dict[str, Any]:
         """Enhanced data type analysis with mixed type detection and validation"""
-        df_sample = self._get_sample()
+        df_sample = self._get_sample().reset_index(drop=True)
         
         type_issues = {}
         inferred_types = {}
@@ -787,7 +797,7 @@ class DataQualityAnalyzer:
     
     def analyze_categorical_columns(self) -> Dict[str, Any]:
         """Identify and analyze categorical columns with enhanced validation"""
-        df_sample = self._get_sample()
+        df_sample = self._get_sample().reset_index(drop=True)
         
         # Identify potential categorical columns
         categorical_cols = []
@@ -864,7 +874,7 @@ class DataQualityAnalyzer:
     
     def analyze_categorical_consistency(self) -> Dict[str, Any]:
         """Analyze categorical columns for consistency issues"""
-        df_sample = self._get_sample()
+        df_sample = self._get_sample().reset_index(drop=True)
         
         consistency_issues = {}
         

@@ -1,0 +1,40 @@
+# Core dependencies
+fastapi==0.109.1
+uvicorn==0.27.1
+pydantic==2.7.1
+sqlalchemy==2.0.29
+alembic==1.14.1
+python-dotenv==1.0.1
+asyncpg==0.29.0
+python-jose==3.3.0
+passlib==1.7.4
+bcrypt==4.1.2
+typing-extensions==4.11.0
+click==8.1.7
+anyio==4.3.0
+greenlet==3.0.3
+cryptography==42.0.5
+psycopg2==2.9.10
+pydantic-settings==2.2.1
+tenacity==8.2.3
+typer==0.12.5
+
+# Task queue
+celery==5.3.6
+
+# Remplacer watchfiles par une version sans Rust
+watchfiles==0.18.1  # Version compatible sans Rust
+
+# --- Imputation dependencies ---
+scikit-learn==1.4.2
+missingpy==0.3.0
+statsmodels==0.14.1
+seaborn==0.13.2
+matplotlib==3.9.0
+missingno==0.5.3
+dask[complete]==2024.4.2
+dask-ml==2024.3.24
+
+
+
+redis>=4.5

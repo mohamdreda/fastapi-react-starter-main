@@ -81,6 +81,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
   
       const data = await response.json();
@@ -100,6 +101,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
         payload: { token, user: data.user }
       });
   
+      // Auto-start a workflow session and store id
+      try {
+        const sessResp = await fetch(`${API_URL}/api/v1/sessions/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: `Session ${new Date().toISOString()}`,
+            description: 'Auto-started on login',
+          }),
+        });
+        if (sessResp.ok) {
+          const sess = await sessResp.json();
+          if (sess?.id) {
+            localStorage.setItem('active_session_id', sess.id);
+          }
+        }
+      } catch {
+        // non-blocking if session creation fails
+      }
+
       // Redirect based on role
       if (data.user.role === 'admin') {
         navigate('/admin/dashboard');
@@ -122,17 +146,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
     
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: credentials.email,
-          first_name: credentials.first_name,
-          last_name: credentials.last_name,
-          password: credentials.password,
-          confirmPassword: credentials.confirmPassword
-        }),
-      });
+      const formData = new FormData();
+        formData.append('email', credentials.email);
+        formData.append('first_name', credentials.first_name);
+        formData.append('last_name', credentials.last_name);
+        formData.append('password', credentials.password);
+
+        const response = await fetch(`${API_URL}/api/v1/auth/register`, {
+          method: 'POST',
+          body: formData,
+        });
   
       const data = await response.json();
   
@@ -149,11 +172,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return { success: false, error: errorMessage };
       }
   
-      // Auto-login after successful registration
-      return login({
-        email: credentials.email,
-        password: credentials.password
-      });
+      // Do not auto-login; let user login manually after registration
+      return { success: true, error: null };
     } catch (error) {
       dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: 'Network error' });
       return { success: false, error: 'Network error' };
@@ -163,8 +183,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [login]);
 
   const logout = useCallback(() => {
+    // Best-effort close current session
+    const sid = localStorage.getItem('active_session_id')
+    const token = localStorage.getItem('token')
+    if (sid && token) {
+      fetch(`${API_URL}/api/v1/sessions/${sid}/close`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      }).catch(() => {})
+    }
+
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('active_session_id')
     dispatch({ type: AUTH_ACTIONS.LOGOUT })
     navigate('/login')
   }, [navigate])
@@ -174,18 +205,43 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (state.token) {
       try {
         const payload = JSON.parse(atob(state.token.split('.')[1]));
-        const expirationTime = payload.exp * 1000; // Convert to milliseconds
+        let expirationTime = payload.exp * 1000; // Convert to milliseconds
         
-        if (Date.now() >= expirationTime) {
-          logout();
-        } else {
-          // Set timeout to logout when token expires
-          const timeout = setTimeout(() => {
+        const schedule = () => {
+          const now = Date.now();
+          const refreshTime = expirationTime - 120_000; // refresh 2min before expiry
+          if (now >= expirationTime) {
             logout();
-          }, expirationTime - Date.now());
-          
+            return;
+          }
+          const delay = Math.max(refreshTime - now, 0);
+          const timeout = setTimeout(async () => {
+            try {
+              const resp = await fetch(`${API_URL}/api/v1/auth/refresh`, {
+                method: 'POST',
+                credentials: 'include',
+              });
+              if (resp.ok) {
+                const data = await resp.json();
+                localStorage.setItem('token', data.access_token);
+                dispatch({
+                  type: AUTH_ACTIONS.LOGIN_SUCCESS,
+                  payload: { token: data.access_token, user: state.user },
+                });
+                // schedule next refresh
+                const newPayload = JSON.parse(atob(data.access_token.split('.')[1]));
+                expirationTime = newPayload.exp * 1000;
+                schedule();
+              } else {
+                logout();
+              }
+            } catch {
+              logout();
+            }
+          }, delay);
           return () => clearTimeout(timeout);
-        }
+        };
+        return schedule();
       } catch (error) {
         console.error('Error checking token expiration:', error);
         logout();

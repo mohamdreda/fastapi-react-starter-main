@@ -1,7 +1,11 @@
 export interface User {
-  id: string
+  id: number | string
   email: string
+  first_name: string
+  last_name: string
   role: 'user' | 'admin' | 'moderator'
+  company?: string | null
+  phone_number?: string | null
 }
 
 export interface LoginCredentials {

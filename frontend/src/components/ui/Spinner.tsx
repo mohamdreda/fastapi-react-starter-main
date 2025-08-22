@@ -1,5 +1,5 @@
 // src/components/ui/Spinner.tsx
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 interface SpinnerProps {
   size?: "sm" | "md" | "lg";

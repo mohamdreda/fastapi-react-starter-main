@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine as create_sync_engine
 from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool
 from app.utils.logger import setup_logger
 from app.config import get_settings
@@ -36,6 +38,19 @@ def get_database_url() -> str:
     password = quote_plus(settings.DB_PASSWORD) if settings.DB_PASSWORD else ""
     return (
         f"postgresql+asyncpg://{settings.DB_USER}:{password}@"
+        f"{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+    )
+
+def get_sync_database_url() -> str:
+    """Construit l'URL de connexion PostgreSQL (pilote synchrone psycopg2)"""
+    required_fields = [settings.DB_USER, settings.DB_NAME, settings.DB_HOST]
+    if not all(required_fields):
+        logger.critical("Configuration PostgreSQL manquante dans les variables d'environnement (sync)")
+        raise ValueError("Configuration de base de données incomplète (sync)")
+
+    password = quote_plus(settings.DB_PASSWORD) if settings.DB_PASSWORD else ""
+    return (
+        f"postgresql+psycopg2://{settings.DB_USER}:{password}@"
         f"{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
     )
 
@@ -112,3 +127,16 @@ async def init_db() -> None:
     except Exception as e:
         logger.critical(f"Échec de l'initialisation de la base de données: {str(e)}")
         raise
+
+# ------------------------------
+# Synchronous engine/session (for Celery and background workers)
+# ------------------------------
+# Note: The web application should use AsyncSession via get_db above.
+# This synchronous SessionLocal is intended for worker processes that do not run in an async event loop.
+sync_engine = create_sync_engine(
+    get_sync_database_url(),
+    pool_pre_ping=True,
+    echo=settings.ENVIRONMENT == "development",
+)
+
+SessionLocal = sessionmaker(bind=sync_engine, autocommit=False, autoflush=False)

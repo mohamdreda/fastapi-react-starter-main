@@ -43,11 +43,15 @@ class Settings(BaseSettings):
     CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     CORS_ALLOW_HEADERS: List[str] = ["*"]
     
+    # Exécution des workflows
+    WORKFLOWS_SYNC: bool = False  # When true, run workflow steps inline (no Celery)
+
     # Configuration des fichiers
     MAX_FILE_SIZE_MB: int = 1024  # 1GB
     ALLOWED_FILE_TYPES: List[str] = ["csv", "xlsx", "json"]
     UPLOAD_DIR: Path = Path("uploads")
-    
+    DATASET_UPLOAD_DIR: str = os.path.join("uploads", "datasets")
+    OUTLIER_ARTIFACTS_BASE_PATH: str = os.path.join("data_artifacts", "outliers")
     # Configuration du logging
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "DEBUG"
     LOG_RETENTION_DAYS: int = 7

@@ -8,7 +8,7 @@ import {
   FaCheck,
   FaSpinner,
 } from 'react-icons/fa';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import ConfirmationDialog from '@/components/ui/ConfirmationDialog';
 
@@ -35,13 +35,11 @@ export const DatasetManager: React.FC = () => {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedDatasetId, setSelectedDatasetId] = useState<number | null>(null);
-
   const { userId } = useParams();
   const navigate = useNavigate();
   const { token } = useAuth();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get('session_id') || localStorage.getItem('active_session_id');
 
   const fetchDatasets = async () => {
     try {
@@ -73,19 +71,16 @@ export const DatasetManager: React.FC = () => {
   }, [token]);
 
   const handleUploadComplete = async () => {
-    setUploading(false);
     await fetchDatasets(); // Refresh list after upload
-  };
-
-  const handleUploadStart = () => {
-    setUploading(true);
-    setError(null);
   };
 
   const handleUploadError = (errorMessage: string) => {
     setError(errorMessage);
-    setUploading(false);
   };
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedDatasetId, setSelectedDatasetId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = (datasetId: number) => {
     setSelectedDatasetId(datasetId);
@@ -94,25 +89,45 @@ export const DatasetManager: React.FC = () => {
 
   const confirmDelete = async () => {
     if (!selectedDatasetId) return;
+    
+    setIsDeleting(true);
+    setError(null);
 
     try {
       const response = await fetch(`${API_URL}/api/v1/datasets/${selectedDatasetId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to delete dataset');
+        let errorMessage = 'Failed to delete dataset';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch (e) {
+          // If we can't parse the error response, use the status text
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
-      setDatasets(datasets.filter(d => d.id !== selectedDatasetId));
-      setDeleteDialogOpen(false);
-      setSelectedDatasetId(null);
+      // Optimistically update the UI
+      setDatasets(currentDatasets => 
+        currentDatasets.filter(d => d.id !== selectedDatasetId)
+      );
+      
+      // Show success message
+      setError('Dataset deleted successfully');
+      setTimeout(() => setError(null), 3000); // Clear success message after 3 seconds
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete dataset');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(`Failed to delete dataset: ${errorMessage}`);
+    } finally {
+      setIsDeleting(false);
       setDeleteDialogOpen(false);
       setSelectedDatasetId(null);
     }
@@ -137,23 +152,22 @@ export const DatasetManager: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8">Dataset Manager</h1>
+    <div className="container mx-auto px-4 py-8 overflow-y-auto h-full text-gray-900 dark:text-gray-100">
+      <h1 className="text-2xl font-bold mb-8 text-gray-900 dark:text-gray-100">Dataset Manager</h1>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Upload New Dataset</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Upload New Dataset</h2>
         <FileUpload
           onUploadComplete={handleUploadComplete}
-          onUploadStart={handleUploadStart}
           onUploadError={handleUploadError}
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Your Datasets</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Your Datasets</h2>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
@@ -161,24 +175,24 @@ export const DatasetManager: React.FC = () => {
         {datasets.length === 0 ? (
           <div className="text-center py-8">
             <div className="flex justify-center mb-4">
-              <FaTable className="text-4xl text-gray-400" />
+              <FaTable className="text-4xl text-gray-400 dark:text-gray-500" />
             </div>
-            <p className="text-gray-500">No datasets</p>
-            <p className="text-gray-400 text-sm">Get started by uploading your first dataset</p>
+            <p className="text-gray-500 dark:text-gray-400">No datasets</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm">Get started by uploading your first dataset</p>
           </div>
         ) : (
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {datasets.map((dataset) => (
-              <div key={dataset.id} className="border rounded-lg p-4">
+              <div key={dataset.id} className="border dark:border-gray-700 rounded-lg p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="font-semibold">{dataset.filename}</h3>
-                    <p className="text-sm text-gray-500">{dataset.file_type}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{dataset.file_type}</p>
                   </div>
                   {getDataQualityIndicator(dataset)}
                 </div>
 
-                <div className="text-sm text-gray-600 mb-4">
+                <div className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                   <p>Missing Values: {(dataset.missing_values?.missing_percentage ?? 0).toFixed(1)}%</p>
                   <p>Duplicates: {dataset.duplicates || 0}</p>
                   <p>Created: {new Date(dataset.created_at).toLocaleDateString()}</p>
@@ -186,7 +200,10 @@ export const DatasetManager: React.FC = () => {
 
                 <div className="flex justify-between items-center">
                   <button
-                    onClick={() => navigate(`/user/dashboard/${userId}/diagnosis/${dataset.id}`)}
+                    onClick={() => {
+                      const to = `/user/dashboard/${userId}/diagnosis/${dataset.id}${sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ''}`;
+                      navigate(to);
+                    }}
                     className="text-blue-500 hover:text-blue-700"
                   >
                     <FaChartBar className="inline mr-1" /> Analyze
@@ -203,15 +220,16 @@ export const DatasetManager: React.FC = () => {
           </div>
         )}
       </div>
-
       <ConfirmationDialog
-        open={deleteDialogOpen}
-        onClose={() => {
-          setDeleteDialogOpen(false);
-          setSelectedDatasetId(null);
-        }}
-        onConfirm={confirmDelete}
-      />
+                open={deleteDialogOpen}
+                onClose={() => !isDeleting && setDeleteDialogOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Dataset"
+                message="Are you sure you want to delete this dataset? This action cannot be undone."
+                confirmButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+                confirmButtonDisabled={isDeleting}
+                cancelButtonDisabled={isDeleting}
+              />
     </div>
   );
 };

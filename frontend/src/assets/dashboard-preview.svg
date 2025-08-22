@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="700" viewBox="0 0 1200 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dashg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="700" rx="24" fill="#0b1220"/>
+  <g>
+    <rect x="60" y="60" width="1080" height="580" rx="16" fill="#0f172a" stroke="#334155"/>
+    <rect x="80" y="90" width="180" height="16" rx="8" fill="#334155"/>
+    <rect x="100" y="130" width="340" height="200" rx="10" fill="#111827"/>
+    <rect x="470" y="130" width="610" height="200" rx="10" fill="#111827"/>
+    <rect x="100" y="350" width="980" height="60" rx="8" fill="#111827"/>
+    <rect x="100" y="430" width="480" height="180" rx="10" fill="#111827"/>
+    <rect x="600" y="430" width="480" height="180" rx="10" fill="#111827"/>
+    <rect x="100" y="165" width="120" height="8" rx="4" fill="#334155"/>
+    <rect x="100" y="185" width="240" height="8" rx="4" fill="#334155"/>
+    <rect x="490" y="165" width="180" height="8" rx="4" fill="#334155"/>
+    <rect x="490" y="185" width="520" height="8" rx="4" fill="#334155"/>
+    <rect x="490" y="205" width="520" height="8" rx="4" fill="#334155"/>
+    <rect x="100" y="370" width="220" height="16" rx="8" fill="url(#dashg)"/>
+  </g>
+</svg>

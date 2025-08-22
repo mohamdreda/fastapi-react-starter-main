@@ -1,0 +1,22 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+  </defs>
+  <!-- Circular container -->
+  <circle cx="64" cy="64" r="60" fill="url(#g)" opacity="0.15" stroke="url(#g)" stroke-width="4"/>
+  <!-- Sparkles / data points -->
+  <circle cx="40" cy="42" r="4" fill="#22c55e"/>
+  <circle cx="88" cy="40" r="3" fill="#0ea5e9"/>
+  <circle cx="96" cy="72" r="5" fill="#06b6d4"/>
+  <circle cx="34" cy="82" r="3.5" fill="#84cc16"/>
+  <!-- Broom (cleaning metaphor) -->
+  <rect x="56" y="28" width="6" height="44" rx="3" fill="#0ea5e9"/>
+  <path d="M38 76c0-6 10-10 26-10s26 4 26 10v6c0 2.2-1.8 4-4 4H42c-2.2 0-4-1.8-4-4v-6z" fill="#22c55e"/>
+  <path d="M44 86h40" stroke="#14532d" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+  <!-- Bars (data) -->
+  <rect x="26" y="58" width="6" height="18" rx="2" fill="#06b6d4"/>
+  <rect x="96" y="52" width="6" height="24" rx="2" fill="#10b981"/>
+</svg>

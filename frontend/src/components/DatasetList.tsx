@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa';
 import { FileUpload } from './FileUpload';
 
@@ -15,6 +15,8 @@ export const DatasetList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get('session_id') || localStorage.getItem('active_session_id');
 
   const fetchDatasets = async () => {
     try {
@@ -133,22 +135,24 @@ export const DatasetList: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center space-x-2">
-                          <Link
-                            to={`/dashboard/diagnosis/${dataset.id}`}
-                            className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
-                            title="Analyze Dataset"
-                          >
-                            <FaSpinner className="w-4 h-4 mr-1" />
-                            Analyze
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(dataset.id)}
-                            className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                            title="Delete Dataset"
-                          >
-                            <FaSpinner className="w-4 h-4 mr-1" />
-                            Delete
-                          </button>
+                          <div className="flex items-center space-x-2">
+                            <Link
+                              to={`/dashboard/diagnosis/${dataset.id}${sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ''}`}
+                              className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
+                              title="Analyze Dataset"
+                            >
+                              <FaSpinner className="w-4 h-4 mr-1" />
+                              Analyze
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(dataset.id)}
+                              className="inline-flex items-center px-2 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                              title="Delete Dataset"
+                            >
+                              <FaSpinner className="w-4 h-4 mr-1" />
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>
