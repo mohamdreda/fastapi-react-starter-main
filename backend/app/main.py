@@ -5,6 +5,8 @@ from contextlib import asynccontextmanager
 import time
 import os
 from .utils.logger import setup_logger
+from pathlib import Path
+from app.config.config import BASE_DIR
 from .routes.workflow import router as workflow_router
 from .routes.auth import router as auth_router
 from .routes.upload import router as upload_router
@@ -12,6 +14,7 @@ from .routes.diagnosis import router as diagnosis_router
 from .routes.datasets import router as datasets_router
 from .routes.users import router as users_router
 from .routes.proxy import router as proxy_router
+from .routes.artifacts import router as artifacts_router
 from .db.database import init_db, engine
 from .config import get_settings
 from .db import models
@@ -21,8 +24,6 @@ from .routes.feature_engineering import router as feature_engineering_router
 from .routes.clustering import router as clustering_router
 from .routes.sessions import router as sessions_router
 from .routes.deduplication_pipeline import router as deduplication_pipeline_router
-from .routes.artifacts import router as artifacts_router
-# Imputation router
 from .routes.imputation import router as imputation_router
 
 logger = setup_logger(__name__)
@@ -93,7 +94,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://127.0.0.1:5173"
+        "http://127.0.0.1:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000"
+
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -109,8 +113,11 @@ for route in app.routes:
     else:  # Likely an APIWebSocketRoute or others without 'methods'
         print(f"ROUTE: {route.path} (non-HTTP route)")
 
-# Mount uploads directory to serve dataset files
-uploads_dir = os.path.abspath(str(settings.UPLOAD_DIR)) if hasattr(settings, "UPLOAD_DIR") else os.path.join(os.getcwd(), "uploads")
+# Mount uploads directory to serve dataset files (anchor to BASE_DIR if relative)
+uploads_dir_path = Path(settings.UPLOAD_DIR) if hasattr(settings, "UPLOAD_DIR") else Path("uploads")
+if not uploads_dir_path.is_absolute():
+    uploads_dir_path = (BASE_DIR / uploads_dir_path).resolve()
+uploads_dir = str(uploads_dir_path)
 if os.path.exists(uploads_dir):
     app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
     logger.info(f"Mounted uploads directory: {uploads_dir}")

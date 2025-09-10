@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from ..schemas.workflow import WorkflowTemplateCreate, WorkflowTemplateUpdate, WorkflowTemplateRead, WorkflowRunCreate, WorkflowRunRead, WorkflowStepRunRead
@@ -35,6 +35,16 @@ async def update_template(template_id: UUID,
         if msg == "Template not found":
             raise HTTPException(status_code=404, detail=msg)
         raise HTTPException(status_code=400, detail=msg)
+
+@router.delete("/templates/{template_id}", status_code=204)
+async def delete_template(template_id: UUID,
+                    db: AsyncSession = Depends(get_db),
+                    current_user: User = Depends(get_current_user)):
+    try:
+        await workflow_service.delete_template(db, current_user, template_id)
+        return Response(status_code=204)
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Access denied")
 
 @router.post("/runs", response_model=WorkflowRunRead)
 async def start_run(payload: WorkflowRunCreate,

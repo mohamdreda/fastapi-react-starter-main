@@ -35,7 +35,9 @@ async def process_uploaded_file(db: AsyncSession, file_path: str, user_id: int, 
         
         # Save analysis results to the dataset
         dataset.missing_values = json.dumps(analysis_results['missing_values'])
-        dataset.duplicates = analysis_results['duplicates']['duplicate_count']
+        # Sum exact and near duplicates for total duplicate count
+        total_duplicates = analysis_results['duplicates']['exact_duplicates'] + analysis_results['duplicates'].get('near_duplicates', 0)
+        dataset.duplicates = total_duplicates
         dataset.data_types = json.dumps(analysis_results['data_types']['inferred_types'])
         dataset.categorical_issues = json.dumps(analysis_results['categorical_consistency'])
         dataset.summary_stats = json.dumps(get_summary_stats(df))
@@ -43,7 +45,12 @@ async def process_uploaded_file(db: AsyncSession, file_path: str, user_id: int, 
         # Save additional metadata
         dataset.analysis_metadata = json.dumps({
             'id_columns': analysis_results['id_columns'],
-            'duplicate_details': analysis_results['duplicates'],
+            'duplicate_details': {
+                'exact_duplicates': analysis_results['duplicates']['exact_duplicates'],
+                'near_duplicates': analysis_results['duplicates'].get('near_duplicates', 0),
+                'duplicate_pairs': analysis_results['duplicates'].get('duplicate_pairs', []),
+                'duplicate_percentage': analysis_results['duplicates'].get('duplicate_percentage', 0)
+            },
             'type_issues': analysis_results['data_types']['type_issues']
         })
         

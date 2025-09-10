@@ -21,6 +21,9 @@ from celery.result import AsyncResult
 from ..services import sessions as session_service
 
 from ..celery_app import celery_app
+from ..config.config import get_settings
+
+settings = get_settings()
 
 router = APIRouter(
     prefix="/imputation",
@@ -72,30 +75,34 @@ async def run_imputation_endpoint(
         except Exception as e:
             print(f"WARNING: Unable to create session step: {e}")
 
-    if req.async_job:
-        task = celery_app.send_task(
-            "tasks.imputation.run",
-            args=[req.dict(), dataset.id, current_user.id, str(session_step_id) if session_step_id else None],
-        )
-        # Link session step to the queued task and mark running
-        if session_step_id is not None:
-            try:
-                await session_service.update_step(
-                    db,
-                    current_user,
-                    step_id=session_step_id,
-                    status="running",
-                    run_ref_type="imputation",
-                    run_ref_id=str(task.id),
-                )
-            except Exception as e:
-                print(f"WARNING: Failed to update session step after task queued: {e}")
-        return {
-            "status": "queued",
-            "message": "Job queued",
-            "task_id": task.id,
-            "session_step_id": str(session_step_id) if session_step_id else None,
-        }
+    if req.async_job and not settings.WORKFLOWS_SYNC:
+        try:
+            task = celery_app.send_task(
+                "tasks.imputation.run",
+                args=[req.dict(), dataset.id, current_user.id, str(session_step_id) if session_step_id else None],
+            )
+            # Link session step to the queued task and mark running
+            if session_step_id is not None:
+                try:
+                    await session_service.update_step(
+                        db,
+                        current_user,
+                        step_id=session_step_id,
+                        status="running",
+                        run_ref_type="imputation",
+                        run_ref_id=str(task.id),
+                    )
+                except Exception as e:
+                    print(f"WARNING: Failed to update session step after task queued: {e}")
+            return {
+                "status": "queued",
+                "message": "Job queued",
+                "task_id": task.id,
+                "session_step_id": str(session_step_id) if session_step_id else None,
+            }
+        except Exception as e:
+            # Broker/backend unavailable or Celery missing; fall back to sync
+            print(f"WARNING: Celery unavailable, running imputation synchronously. Reason: {e}")
 
     # Synchronous execution path
     if session_step_id is not None:

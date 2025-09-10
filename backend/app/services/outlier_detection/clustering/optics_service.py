@@ -123,10 +123,12 @@ class OpticsService:
             MAX_SAMPLES = 10000  # Maximum number of samples for full OPTICS
             use_sampling = False
             sampled_indices = None
+            needs_knn_assignment = False
             
             if scaled_feature_values.shape[0] > MAX_SAMPLES:
                 print(f"OPTICS_SERVICE: Dataset is large ({scaled_feature_values.shape[0]} samples). Using sampling for OPTICS.")
                 use_sampling = True
+                needs_knn_assignment = True
                 # Use stratified sampling if we have true labels, otherwise random sampling
                 np.random.seed(42)  # For reproducibility
                 sampled_indices = np.random.choice(scaled_feature_values.shape[0], MAX_SAMPLES, replace=False)
@@ -134,6 +136,8 @@ class OpticsService:
                 print(f"OPTICS_SERVICE: Sampled {MAX_SAMPLES} points for initial OPTICS clustering")
             else:
                 sampled_data = scaled_feature_values
+                # Track indices so we can support secondary sub-sampling consistently
+                sampled_indices = np.arange(scaled_feature_values.shape[0])
             
             # Initialize OPTICS with optimized parameters
             optics = OPTICS(
@@ -147,7 +151,7 @@ class OpticsService:
                 # Note: OPTICS doesn't support random_state parameter
             )
             
-            # Fit the model on the sampled data with a timeout
+            # Fit the model on the sampled data
             print(f"OPTICS_SERVICE: Fitting OPTICS on {sampled_data.shape[0]} samples")
             
             # Use a more aggressive sampling if the dataset is still large
@@ -159,6 +163,11 @@ class OpticsService:
                 subsample_data = sampled_data[subsample_indices]
                 print(f"OPTICS_SERVICE: Further reduced to {subsample_data.shape[0]} samples")
                 
+                # Update mapping to reflect secondary sub-sampling
+                sampled_indices = sampled_indices[subsample_indices]
+                sampled_data = subsample_data
+                needs_knn_assignment = True
+                
                 # Use a faster algorithm for initial clustering
                 from sklearn.cluster import DBSCAN
                 print("OPTICS_SERVICE: Using DBSCAN for initial clustering (faster)")
@@ -167,79 +176,25 @@ class OpticsService:
                 
                 # Only use OPTICS if DBSCAN fails to find meaningful clusters
                 if len(set(initial_labels)) <= 2:  # Only noise or one real cluster
-                    print("OPTICS_SERVICE: DBSCAN found few clusters, trying OPTICS with timeout")
+                    print("OPTICS_SERVICE: DBSCAN found few clusters, running OPTICS synchronously (no timeout)")
                     try:
-                        import threading
-                        import multiprocessing
-                        
-                        # Define a timeout exception
-                        class TimeoutException(Exception):
-                            pass
-                        
-                        # Use multiprocessing for Windows compatibility
-                        # This runs OPTICS in a separate process that can be terminated
-                        def run_optics(data, result_queue):
-                            try:
-                                labels = optics.fit_predict(data)
-                                result_queue.put((True, labels, optics))
-                            except Exception as e:
-                                result_queue.put((False, str(e), None))
-                        
-                        # Set a timeout of 60 seconds for OPTICS
-                        MAX_OPTICS_TIME = 60
-                        
-                        # Create a queue for the result
-                        result_queue = multiprocessing.Queue()
-                        
-                        # Start the process
-                        process = multiprocessing.Process(
-                            target=run_optics,
-                            args=(subsample_data, result_queue)
-                        )
-                        
-                        print(f"OPTICS_SERVICE: Starting OPTICS with {MAX_OPTICS_TIME}s timeout")
-                        process.start()
-                        
-                        # Wait for the specified timeout
-                        process.join(MAX_OPTICS_TIME)
-                        
-                        # Check if the process is still running
-                        if process.is_alive():
-                            print(f"OPTICS_SERVICE: OPTICS timed out after {MAX_OPTICS_TIME} seconds")
-                            # Terminate the process
-                            process.terminate()
-                            process.join()
-                            raise TimeoutException("OPTICS took too long")
-                        
-                        # Get the result
-                        if not result_queue.empty():
-                            success, result, model = result_queue.get()
-                            if success:
-                                sampled_labels = result
-                                optics = model  # Update the model with the fitted one
-                            else:
-                                raise Exception(result)
-                        else:
-                            raise Exception("No result from OPTICS process")
-                    except TimeoutException:
-                        print(f"OPTICS_SERVICE: OPTICS timed out after {MAX_OPTICS_TIME} seconds, using DBSCAN results")
-                        sampled_labels = initial_labels
+                        sampled_labels = optics.fit_predict(subsample_data)
                     except Exception as e:
-                        print(f"OPTICS_SERVICE: Error during OPTICS: {e}, using DBSCAN results")
+                        print(f"OPTICS_SERVICE: Error during OPTICS fit_predict: {e}, using DBSCAN results")
                         sampled_labels = initial_labels
                 else:
                     print("OPTICS_SERVICE: Using DBSCAN results (found good clusters)")
                     sampled_labels = initial_labels
                     optics = dbscan  # Use DBSCAN as our model
-                
-                # When using double sampling, we need to make sure the data and labels match
-                # Map subsample data back to the original sampled data
-                if use_sampling:
-                    # We're using the subsample data and labels for the KNN classifier
-                    # so we need to update sampled_data to match
-                    sampled_data = subsample_data
-                    # And update the indices mapping
-                    sampled_indices = sampled_indices[subsample_indices]
+                    
+                    # When using double sampling, we need to make sure the data and labels match
+                    # Map subsample data back to the original sampled data
+                    if use_sampling:
+                        # We're using the subsample data and labels for the KNN classifier
+                        # so we need to update sampled_data to match
+                        sampled_data = subsample_data
+                        # And update the indices mapping
+                        sampled_indices = sampled_indices[subsample_indices]
             else:
                 # For smaller datasets, use OPTICS directly
                 sampled_labels = optics.fit_predict(sampled_data)
@@ -247,7 +202,7 @@ class OpticsService:
             self.cluster_model = optics
             
             # If we used sampling, we need to assign labels to the full dataset
-            if use_sampling:
+            if needs_knn_assignment:
                 # Use a nearest neighbors classifier to assign labels to all points
                 from sklearn.neighbors import KNeighborsClassifier
                 print(f"OPTICS_SERVICE: Assigning cluster labels to all {scaled_feature_values.shape[0]} points")
@@ -270,7 +225,7 @@ class OpticsService:
             # Save reachability plot data if available (only for OPTICS, not for DBSCAN)
             if hasattr(optics, 'reachability_') and optics.reachability_ is not None:
                 # If we used sampling, the reachability_ is only for the sampled points
-                if use_sampling and hasattr(optics, 'ordering_'):
+                if needs_knn_assignment and hasattr(optics, 'ordering_'):
                     # We can only save reachability for the sampled points
                     reachability_df = pd.DataFrame({
                         'ordering': np.arange(len(optics.reachability_)),

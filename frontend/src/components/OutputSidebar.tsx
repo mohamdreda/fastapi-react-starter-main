@@ -20,6 +20,40 @@ const OutputSidebar: React.FC<OutputSidebarProps> = ({ outputs, currentStep, onC
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const formatOutputContent = (output: Output) => {
+    // helper to summarize categorical encoding configs (methods + columns)
+    const renderCategoricalSummary = (cfg: any) => {
+      const ce = cfg?.categorical_encoding;
+      const methods: Array<{ method?: string; columns?: string[]; drop?: string }>
+        = Array.isArray(ce?.methods) ? ce.methods : [];
+      if (!methods.length) return null;
+      return (
+        <div className="space-y-1">
+          <div className="text-[11px] text-gray-500 dark:text-gray-400">Categorical encoding methods:</div>
+          <ul className="pl-3 list-disc space-y-1">
+            {methods.map((m, i) => (
+              <li key={i} className="text-xs">
+                <span className="inline-flex items-center px-2 py-0.5 mr-2 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800">
+                  {m?.method || 'method'}
+                </span>
+                {Array.isArray(m?.columns) && m!.columns!.length > 0 && (
+                  <span className="inline-flex flex-wrap gap-1 align-middle">
+                    {m!.columns!.map((c, idx) => (
+                      <span key={idx} className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
+                        {c}
+                      </span>
+                    ))}
+                  </span>
+                )}
+                {m?.drop && (
+                  <span className="ml-2 text-[11px] text-gray-500 dark:text-gray-400">drop: {m.drop}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    };
+
     switch (output.type) {
       case 'upload':
         return (
@@ -49,9 +83,23 @@ const OutputSidebar: React.FC<OutputSidebarProps> = ({ outputs, currentStep, onC
       case 'transformation':
         return (
           <div>
-            <p className="text-sm">Normalization: {output.details?.normalization}</p>
-            <p className="text-sm">Encoding: {output.details?.encoding}</p>
-            <p className="text-sm">Scaling: {output.details?.scaling}</p>
+            {output.details && typeof output.details === 'object' ? (
+              <>
+                {renderCategoricalSummary(output.details)}
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-[11px] text-gray-500 dark:text-gray-400">Show JSON</summary>
+                  <pre className="text-xs mt-1 p-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded overflow-auto max-h-60 whitespace-pre-wrap">
+                    {JSON.stringify(output.details, null, 2)}
+                  </pre>
+                </details>
+              </>
+            ) : (
+              <>
+                <p className="text-sm">Normalization: {output.details?.normalization}</p>
+                <p className="text-sm">Encoding: {output.details?.encoding}</p>
+                <p className="text-sm">Scaling: {output.details?.scaling}</p>
+              </>
+            )}
           </div>
         );
       case 'model':

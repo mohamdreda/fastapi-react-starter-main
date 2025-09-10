@@ -26,7 +26,7 @@ from sklearn.metrics import (
 )
 
 # Auth dependencies
-from app.services.auth import get_current_user
+from app.services.auth import get_current_user, get_current_user_id
 
 from app.db import get_db
 from app.db.database import AsyncSessionLocal
@@ -285,6 +285,10 @@ async def run_outlier_detection_pipeline_task(
                 print(f"TASK_WRAPPER: Attempting to generate visualizations for run_id {run_id}...")
                 viz_paths_dict = {}
                 
+                # Use a consistent, report-friendly theme and palette
+                sns.set_theme(style='whitegrid', context='notebook', font_scale=1.1)
+                palette = {'Inlier': '#2563eb', 'Outlier': '#ef4444'}  # blue, red
+                
                 # 1. Generate scatter plot of the first two features with outliers highlighted
                 plt.figure(figsize=(10, 8))
                 if len(numerical_df.columns) >= 2:
@@ -295,39 +299,55 @@ async def run_outlier_detection_pipeline_task(
                     # Create a copy of the numerical DataFrame with outlier information
                     plot_df = numerical_df.copy()
                     plot_df['is_outlier'] = outlier_results_df['is_outlier']
+                    plot_df['label'] = np.where(plot_df['is_outlier'], 'Outlier', 'Inlier')
                     
-                    # Plot inliers and outliers with different colors
+                    # Plot inliers and outliers with different colors and markers
                     sns.scatterplot(
                         x=feature_cols[0],
                         y=feature_cols[1],
-                        hue='is_outlier',
-                        palette={False: 'blue', True: 'red'},
+                        hue='label',
+                        style='label',
+                        markers={'Inlier': 'o', 'Outlier': 'X'},
+                        palette=palette,
                         data=plot_df,
-                        alpha=0.7
+                        s=40,
+                        alpha=0.85,
+                        edgecolor='white',
+                        linewidth=0.3,
+                        legend=True
                     )
                     plt.title(f'Outlier Detection using {results_summary["outlier_detection_method"].replace("_", " ").title()}')
-                    plt.legend(title='Outlier', labels=['Inlier', 'Outlier'])
+                    plt.legend(title='Class', loc='upper right', frameon=True)
+                    plt.tight_layout()
                 else:
                     # If only one feature, create a 1D scatter plot
                     feature_col = numerical_df.columns[0]
                     plot_df = numerical_df.copy()
                     plot_df['is_outlier'] = outlier_results_df['is_outlier']
+                    plot_df['label'] = np.where(plot_df['is_outlier'], 'Outlier', 'Inlier')
                     plot_df['y'] = 0  # Dummy y value for visualization
                     
                     sns.scatterplot(
                         x=feature_col,
                         y='y',
-                        hue='is_outlier',
-                        palette={False: 'blue', True: 'red'},
+                        hue='label',
+                        style='label',
+                        markers={'Inlier': 'o', 'Outlier': 'X'},
+                        palette=palette,
                         data=plot_df,
-                        alpha=0.7
+                        s=40,
+                        alpha=0.85,
+                        edgecolor='white',
+                        linewidth=0.3,
+                        legend=True
                     )
                     plt.title(f'Outlier Detection using {results_summary["outlier_detection_method"].replace("_", " ").title()}')
-                    plt.legend(title='Outlier', labels=['Inlier', 'Outlier'])
+                    plt.legend(title='Class', loc='upper right', frameon=True)
                     plt.yticks([])
+                    plt.tight_layout()
                 
                 bytes_io = BytesIO()
-                plt.savefig(bytes_io, format='png')
+                plt.savefig(bytes_io, format='png', dpi=200, bbox_inches='tight')
                 bytes_io.seek(0)
                 scatter_plot_path_val = base64.b64encode(bytes_io.read()).decode('utf-8')
                 viz_paths_dict['scatter_plot_path'] = scatter_plot_path_val
@@ -348,21 +368,25 @@ async def run_outlier_detection_pipeline_task(
                 
                 if score_col and score_col in outlier_results_df.columns:
                     # Create histogram of outlier scores with different colors for inliers and outliers
+                    score_df = outlier_results_df.copy()
+                    score_df['label'] = np.where(score_df['is_outlier'], 'Outlier', 'Inlier')
                     sns.histplot(
-                        data=outlier_results_df,
+                        data=score_df,
                         x=score_col,
-                        hue='is_outlier',
-                        palette={False: 'blue', True: 'red'},
+                        hue='label',
+                        palette=palette,
                         kde=True,
-                        bins=30
+                        bins=30,
+                        alpha=0.75
                     )
                     plt.title(f'Distribution of Outlier Scores ({results_summary["outlier_detection_method"].replace("_", " ").title()})')
                     plt.xlabel('Outlier Score')
                     plt.ylabel('Count')
-                    plt.legend(title='Outlier', labels=['Inlier', 'Outlier'])
+                    plt.legend(title='Class', loc='upper right', frameon=True)
+                    plt.tight_layout()
                     
                     bytes_io = BytesIO()
-                    plt.savefig(bytes_io, format='png')
+                    plt.savefig(bytes_io, format='png', dpi=200, bbox_inches='tight')
                     bytes_io.seek(0)
                     outlier_distribution_path_val = base64.b64encode(bytes_io.read()).decode('utf-8')
                     viz_paths_dict['outlier_distribution_path'] = outlier_distribution_path_val
@@ -384,24 +408,32 @@ async def run_outlier_detection_pipeline_task(
                     # Create DataFrame with PCA results
                     pca_df = pd.DataFrame(data=pca_result, columns=['PC1', 'PC2'])
                     pca_df['is_outlier'] = outlier_results_df['is_outlier']
+                    pca_df['label'] = np.where(pca_df['is_outlier'], 'Outlier', 'Inlier')
                     
                     # Plot PCA results with outliers highlighted
                     plt.figure(figsize=(10, 8))
                     sns.scatterplot(
                         x='PC1',
                         y='PC2',
-                        hue='is_outlier',
-                        palette={False: 'blue', True: 'red'},
+                        hue='label',
+                        style='label',
+                        markers={'Inlier': 'o', 'Outlier': 'X'},
+                        palette=palette,
                         data=pca_df,
-                        alpha=0.7
+                        s=40,
+                        alpha=0.85,
+                        edgecolor='white',
+                        linewidth=0.3,
+                        legend=True
                     )
                     plt.title(f'PCA Visualization of Outliers ({results_summary["outlier_detection_method"].replace("_", " ").title()})')
                     plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.2%} variance)')
                     plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.2%} variance)')
-                    plt.legend(title='Outlier', labels=['Inlier', 'Outlier'])
+                    plt.legend(title='Class', loc='upper right', frameon=True)
+                    plt.tight_layout()
                     
                     bytes_io = BytesIO()
-                    plt.savefig(bytes_io, format='png')
+                    plt.savefig(bytes_io, format='png', dpi=200, bbox_inches='tight')
                     bytes_io.seek(0)
                     pca_plot_path_val = base64.b64encode(bytes_io.read()).decode('utf-8')
                     viz_paths_dict['pca_plot_path'] = pca_plot_path_val
@@ -808,10 +840,9 @@ async def trigger_outlier_detection(
 @router.get("/runs/{run_id}/status", response_model=Dict[str, Any])
 async def get_outlier_detection_status(
     run_id: int = Path(..., ge=1, description="The ID of the outlier detection run."),
-    db: AsyncSession = Depends(get_db),
-    current_user: UserSchema = Depends(get_current_user)
+    current_user_id: int = Depends(get_current_user_id)
 ):
-    user_id_for_query = int(current_user.id)
+    user_id_for_query = int(current_user_id)
     
     # Use raw SQL to only query columns that actually exist in the database
     query = text("""
@@ -821,9 +852,38 @@ async def get_outlier_detection_status(
         WHERE id = :run_id
     """)
     
-    result = await db.execute(query, {"run_id": run_id})
-    run_record = result.mappings().first()
-
+    try:
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(query, {"run_id": run_id})
+            run_record = result.mappings().first()
+    except Exception as e:
+        # Graceful degraded response when DB is temporarily unavailable
+        task_id_for_status = f"outlier_run_{run_id}"
+        current_mem_status = background_task_status_dict.get(task_id_for_status, "unknown")
+        # IMPORTANT: Return a plain dict to avoid Pydantic validation on missing fields
+        response_dict: Dict[str, Any] = {
+            "task_id": task_id_for_status,
+            "status": current_mem_status,
+            "run_details": {
+                "id": run_id,
+                "user_id": user_id_for_query,
+                "task_id": task_id_for_status,
+                "status": current_mem_status,
+                # Provide minimal placeholders; frontend mainly needs status while DB is down
+                "dataset_id": None,
+                "parameters_json": None,
+                "started_at": None,
+                "completed_at": None,
+                "error_message": f"Database temporarily unavailable: {str(e)}",
+            },
+        }
+        # Copy critical fields also to top-level for frontend compatibility
+        for key, value in list(response_dict.get("run_details", {}).items()):
+            if key not in response_dict:
+                response_dict[key] = value
+        print("STATUS ENDPOINT: DB unavailable, returning in-memory status only")
+        return response_dict
+    
     if not run_record:
         raise HTTPException(status_code=404, detail=f"Outlier detection run with ID {run_id} not found.")
 
@@ -921,12 +981,12 @@ async def get_outlier_detection_status(
             print(f"Error extracting data from parameters JSON: {str(e)}")
     
     # Create the response with enhanced details
-    response = TaskStatusResponse(
-        task_id=task_id_for_status,
-        status=display_status,
-        run_details=run_details
-    )
-    response_dict = response.dict()
+    response = {
+        "task_id": task_id_for_status,
+        "status": display_status,
+        "run_details": run_details
+    }
+    response_dict = response
     
     # Add key fields at top level for frontend compatibility
     if run_details:

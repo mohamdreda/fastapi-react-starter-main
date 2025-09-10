@@ -167,11 +167,17 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, config 
           )}
         </div>
 
-        {results.visualization_data?.scatter_plot_path && (
+        {(results.visualization_data?.scatter_plot_path || (results as any)?.scatter_plot_path) && (
           <div className="bg-white p-4 rounded-lg shadow">
             <h3 className="font-medium mb-3">Outlier Visualization</h3>
             <img 
-              src={results.visualization_data.scatter_plot_path} 
+              src={((): string => {
+                const p = results.visualization_data?.scatter_plot_path || (results as any)?.scatter_plot_path;
+                if (!p) return '';
+                if (p.startsWith('data:image/')) return p;
+                if (p.length > 100 && /^[A-Za-z0-9+/=]+$/.test(p)) return `data:image/png;base64,${p}`;
+                return p.startsWith('/') ? `${API_BASE_URL}${p}` : p;
+              })()} 
               alt="Outlier Visualization" 
               className="w-full h-auto rounded-lg border" 
             />

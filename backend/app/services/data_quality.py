@@ -242,198 +242,270 @@ class DataQualityAnalyzer:
     def analyze_duplicates(self, case_sensitive: bool = False, 
                           ignore_whitespace: bool = True,
                           exclude_id_columns: bool = True,
-                          similarity_threshold: float = 0.9) -> Dict[str, Any]:
-        """Context-aware duplicate detection with configurable parameters
+                          similarity_threshold: float = 0.8) -> Dict[str, Any]:
+        """Memory-efficient duplicate detection using MinHash and LSH.
         
         Parameters:
         - case_sensitive: Whether to consider case when comparing string values
         - ignore_whitespace: Whether to ignore whitespace in string comparisons
         - exclude_id_columns: Whether to exclude ID-like columns from comparison
-        - similarity_threshold: Threshold for fuzzy matching (0.0-1.0)
+        - similarity_threshold: Threshold for fuzzy matching (0.0-1.0). 
+                              Note: Values too close to 1.0 may cause errors.
+                              Default is 0.8 for better stability.
+        
+        Returns:
+            Dictionary containing duplicate analysis results
         """
-        df_sample = self._get_sample().reset_index(drop=True)
-        
-        # Determine columns to check
-        columns_to_check = list(df_sample.columns)
-        id_columns_excluded = []
-        
-        if exclude_id_columns:
-            # Use the identified ID columns and also exclude any columns with ID-like patterns in the name
-            id_columns_excluded = self.id_columns.copy()
+        try:
+            from datasketch import MinHash, MinHashLSH
+            import re
+            from collections import defaultdict
             
-            # More comprehensive ID column detection
-            id_patterns = ['id', 'key', 'uuid', 'guid', 'index', 'code', 'num', 'no', 'number']
-            additional_id_cols = []
+            # Ensure threshold is within valid range and allows for enough bands
+            # MinHashLSH requires: (1/bands)^(1/rows) <= threshold
+            # With default num_perm=128, we need threshold <= 1 - (1/128) ≈ 0.992
+            similarity_threshold = min(max(0.5, similarity_threshold), 0.99)
             
-            for col in columns_to_check:
-                # Check if column name contains any ID patterns
-                if any(pattern in col.lower() for pattern in id_patterns):
-                    additional_id_cols.append(col)
-                # Check if column has mostly unique values (>95% unique)
-                elif len(df_sample) > 10:  # Only check if we have enough rows
-                    uniqueness = df_sample[col].nunique() / len(df_sample)
-                    if uniqueness > 0.95:
-                        additional_id_cols.append(col)
-            
-            # Add the additional ID columns that weren't already in id_columns_excluded
-            id_columns_excluded.extend([col for col in additional_id_cols if col not in id_columns_excluded])
-            
-            # Remove ID columns from the columns to check
-            columns_to_check = [col for col in columns_to_check if col not in id_columns_excluded]
-        
-        # Create a copy for normalization
-        df_normalized = df_sample[columns_to_check].copy()
-        
-        # Apply normalization based on parameters
-        for col in df_normalized.columns:
-            if df_normalized[col].dtype == 'object':
-                # Convert to string to handle non-string objects
-                df_normalized[col] = df_normalized[col].astype(str)
-                
-                # Replace null indicators with a consistent value
-                for indicator in ["nan", "null", "none", "na", "n/a", ""]:
-                    df_normalized[col] = df_normalized[col].str.replace(f"^{indicator}$", "NULL", case=False, regex=True)
-                
-                # Apply case normalization if specified (default is case-insensitive)
-                if not case_sensitive:
-                    df_normalized[col] = df_normalized[col].str.lower()
-                
-                # Remove whitespace if specified (default is true)
-                if ignore_whitespace:
-                    # Strip leading/trailing whitespace
-                    df_normalized[col] = df_normalized[col].str.strip()
-                    # Replace multiple spaces with a single space
-                    df_normalized[col] = df_normalized[col].str.replace(r'\s+', ' ', regex=True)
-                    # Remove special characters that might cause false negatives
-                    df_normalized[col] = df_normalized[col].str.replace(r'[,\.\'"\-_\(\)\[\]\{\}]', '', regex=True)
-        
-        # Find exact duplicates
-        duplicates = df_normalized.duplicated(keep='first')
-        duplicate_count = duplicates.sum()
-        duplicate_indices = duplicates[duplicates].index.tolist()
-        
-        # Find near-duplicates using fuzzy matching for small to medium datasets
-        near_duplicate_pairs = []
-        if len(df_normalized) <= 10000 and similarity_threshold < 1.0:  # Only for reasonably sized datasets
-            try:
-                from rapidfuzz import fuzz
-                
-                # Convert dataframe to list of tuples for faster comparison
-                records = df_normalized.to_dict('records')  # Index now positional
-                record_strings = [str(r) for r in records]
-                
-                # Compare each record with others (excluding already identified exact duplicates)
-                non_duplicate_indices = [i for i in range(len(records)) if i not in duplicate_indices]
-                
-                for i in range(len(non_duplicate_indices)):
-                    idx1 = non_duplicate_indices[i]
-                    for j in range(i+1, len(non_duplicate_indices)):
-                        idx2 = non_duplicate_indices[j]
-                        
-                        # Calculate similarity ratio
-                        similarity = fuzz.ratio(record_strings[idx1], record_strings[idx2]) / 100.0
-                        
-                        if similarity >= similarity_threshold:
-                            near_duplicate_pairs.append((idx1, idx2, similarity))
-                            duplicate_count += 1  # Count near-duplicates in the total
-            except ImportError:
-                # If rapidfuzz is not available, skip near-duplicate detection
-                pass
-        
-        duplicate_percentage = (duplicate_count / len(df_normalized) * 100) if len(df_normalized) > 0 else 0
-        
-        # Get examples of duplicates for explanation
-        examples = []
-        
-        # First add exact duplicates
-        if duplicate_indices:
-            for dup_idx in duplicate_indices[:min(5, len(duplicate_indices))]:
-                # Find the original row this is a duplicate of
-                dup_values = df_normalized.loc[dup_idx].to_dict()
-                
-                # Find all rows with these values
-                matches = df_normalized.loc[(df_normalized == dup_values).all(axis=1)].index.tolist()
-                # Check if matches is empty before finding minimum
-                if matches:
-                    original_idx = min(matches)  # Assume the first occurrence is the original
-                else:
-                    # Skip this duplicate if no matches found
-                    continue
-                
-                if original_idx != dup_idx:  # Ensure we're not comparing a row to itself
-                    examples.append({
-                        'original_index': int(original_idx),
-                        'duplicate_index': int(dup_idx),
-                        'original_row': df_sample.loc[original_idx].to_dict(),
-                        'duplicate_row': df_sample.loc[dup_idx].to_dict(),
-                        'type': 'exact',
-                        'similarity': 1.0
-                    })
-        
-        # Then add near-duplicates
-        # Check if near_duplicate_pairs is not empty before processing
-        if near_duplicate_pairs:
-            for idx1, idx2, similarity in near_duplicate_pairs[:min(5, len(near_duplicate_pairs))]:
-                examples.append({
-                    'original_index': int(idx1),
-                    'duplicate_index': int(idx2),
-                    'original_row': df_sample.loc[idx1].to_dict(),
-                    'duplicate_row': df_sample.loc[idx2].to_dict(),
-                    'type': 'near',
-                    'similarity': float(similarity)
-                })
-        
-        # Extrapolate to full dataset
-        if self.is_dask:
-            # For Dask, we can't easily compute duplicates on the full dataset
-            # So we extrapolate based on the sample
-            estimated_duplicate_count = int(duplicate_percentage / 100 * self.total_rows)
-            duplicate_count = estimated_duplicate_count
-        else:
-            # For Pandas, we can compute the exact count if the dataset isn't too large
-            if self.total_rows <= 100000:  # Only compute for reasonably sized datasets
-                # Apply the same normalization to the full dataset
-                full_df_normalized = self.df[columns_to_check].copy()
-                
-                for col in full_df_normalized.columns:
-                    if full_df_normalized[col].dtype == 'object':
-                        full_df_normalized[col] = full_df_normalized[col].astype(str)
-                        
-                        if not case_sensitive:
-                            full_df_normalized[col] = full_df_normalized[col].str.lower()
-                        
-                        if ignore_whitespace:
-                            full_df_normalized[col] = full_df_normalized[col].str.strip()
-                            full_df_normalized[col] = full_df_normalized[col].str.replace(r'\s+', ' ', regex=True)
-                
-                exact_duplicate_count = full_df_normalized.duplicated(keep='first').sum()
-                
-                # Adjust for near-duplicates in the full dataset
-                if near_duplicate_pairs:
-                    near_duplicate_ratio = len(near_duplicate_pairs) / len(df_normalized)
-                    estimated_near_duplicates = int(near_duplicate_ratio * self.total_rows)
-                    duplicate_count = int(exact_duplicate_count) + estimated_near_duplicates
-                else:
-                    duplicate_count = int(exact_duplicate_count)
-                
-                duplicate_percentage = (duplicate_count / self.total_rows * 100) if self.total_rows > 0 else 0
+            # Get a sample of the data for analysis
+            if self.is_dask:
+                df_sample = self._get_sample()
             else:
-                # For large datasets, still use the sample estimate
+                df_sample = self.df.copy()
+            
+            # Select columns to check for duplicates
+            if exclude_id_columns and self.id_columns:
+                columns_to_check = [col for col in df_sample.columns if col not in self.id_columns]
+                if not columns_to_check:  # If all columns were ID columns
+                    columns_to_check = df_sample.columns.tolist()
+            else:
+                columns_to_check = df_sample.columns.tolist()
+            
+            # Create a copy with only the columns we need
+            df_normalized = df_sample[columns_to_check].copy()
+            
+            # Normalize the data
+            for col in df_normalized.columns:
+                if df_normalized[col].dtype == 'object':
+                    # Convert to string and handle case sensitivity
+                    df_normalized[col] = df_normalized[col].astype(str)
+                    
+                    if not case_sensitive:
+                        df_normalized[col] = df_normalized[col].str.lower()
+                    
+                    # Handle whitespace normalization
+                    if ignore_whitespace:
+                        df_normalized[col] = df_normalized[col].str.strip()
+                        df_normalized[col] = df_normalized[col].str.replace(r'\s+', ' ', regex=True)
+                        df_normalized[col] = df_normalized[col].str.replace(r'[,.\'"\-_\(\)\[\]\{\}]', '', regex=True)
+            
+            # Create a combined text column for each row
+            df_normalized['_combined'] = df_normalized.astype(str).apply(' '.join, axis=1)
+            
+            # Function to create tokens from text
+            def get_tokens(text):
+                return re.findall(r'\w+', text.lower())
+            
+            # Initialize LSH with proper parameters
+            # num_perm controls the number of permutations (higher = more accurate but slower)
+            # We'll use 128 permutations as a good balance between accuracy and performance
+            num_perm = 128
+            
+            # Adjust threshold to ensure we have enough bands
+            # MinHashLSH requires: (1/bands)^(1/rows) <= threshold
+            # With num_perm=128, we need at least 2 bands (b >= 2)
+            # So we'll set a minimum threshold that ensures b >= 2
+            min_threshold = 0.5  # This ensures at least 2 bands with num_perm=128
+            similarity_threshold = max(min_threshold, min(similarity_threshold, 0.99))
+            
+            # Calculate optimal number of bands and rows
+            # We want to maximize bands while keeping rows >= 1
+            # bands * rows = num_perm
+            # We'll aim for at least 2 bands for better performance
+            bands = min(32, max(2, int(1 / ((1 - similarity_threshold) ** 2))))
+            rows = max(1, num_perm // bands)
+            
+            # Create LSH index
+            lsh = MinHashLSH(
+                threshold=similarity_threshold,
+                num_perm=num_perm,
+                params=(bands, rows),
+                storage_config={
+                    'type': 'dict',
+                    'basename': b'lsh_data'  # Ensure basename is bytes
+                }
+            )
+            fingerprints = {}
+            
+            # First pass: Create MinHash signatures
+            for idx, row in df_normalized.iterrows():
+                text = row['_combined']
+                mh = MinHash(num_perm=128)
+                for token in get_tokens(text):
+                    mh.update(token.encode('utf-8'))
+                lsh.insert(idx, mh)
+                fingerprints[idx] = mh
+            
+            # Second pass: Find duplicate groups
+            duplicate_groups = defaultdict(set)
+            processed = set()
+            
+            for idx, mh in fingerprints.items():
+                if idx in processed:
+                    continue
+                    
+                # Find similar items
+                similar_indices = lsh.query(mh)
+                if len(similar_indices) > 1:  # Found duplicates
+                    group = set(similar_indices)
+                    group_id = min(group)  # Use smallest ID as group ID
+                    
+                    # Add to groups
+                    for item in group:
+                        if item != group_id:  # Don't add the group ID to itself
+                            duplicate_groups[group_id].add(item)
+                            processed.add(item)
+            
+            # Convert to list of pairs for backward compatibility
+            near_duplicate_pairs = []
+            for group_id, duplicates in duplicate_groups.items():
+                for dup_idx in duplicates:
+                    # Calculate actual similarity for the pair
+                    similarity = fingerprints[group_id].jaccard(fingerprints[dup_idx])
+                    near_duplicate_pairs.append((group_id, dup_idx, similarity))
+            
+            # Find exact duplicates (similarity = 1.0)
+            exact_duplicates = df_normalized.duplicated(keep='first')
+            exact_duplicate_indices = set(df_normalized[exact_duplicates].index.tolist())
+            
+            # Combine exact and near duplicates
+            all_duplicate_indices = exact_duplicate_indices.union(
+                {idx for pair in near_duplicate_pairs for idx in pair[:2]}
+            )
+            
+            # Get examples for reporting
+            examples = []
+            
+            # Add exact duplicates examples
+            if len(exact_duplicate_indices) > 0:
+                sample_dupes = list(exact_duplicate_indices)[:min(3, len(exact_duplicate_indices))]
+                for dup_idx in sample_dupes:
+                    # Find the original row this is a duplicate of
+                    dup_values = df_normalized.loc[dup_idx].to_dict()
+                    matches = df_normalized.loc[(df_normalized == dup_values).all(axis=1)].index.tolist()
+                    if matches:
+                        original_idx = min(matches)
+                        if original_idx != dup_idx:
+                            examples.append({
+                                'original_index': int(original_idx),
+                                'duplicate_index': int(dup_idx),
+                                'original_row': df_sample.loc[original_idx].to_dict(),
+                                'duplicate_row': df_sample.loc[dup_idx].to_dict(),
+                                'type': 'exact',
+                                'similarity': 1.0
+                            })
+            
+            # Add near duplicates examples
+            if near_duplicate_pairs:
+                for idx1, idx2, similarity in near_duplicate_pairs[:min(3, len(near_duplicate_pairs))]:
+                    examples.append({
+                        'original_index': int(idx1),
+                        'duplicate_index': int(idx2),
+                        'original_row': df_sample.loc[idx1].to_dict(),
+                        'duplicate_row': df_sample.loc[idx2].to_dict(),
+                        'type': 'near',
+                        'similarity': float(similarity)
+                    })
+            
+            # Calculate statistics
+            total_duplicates = len(exact_duplicate_indices) + len(near_duplicate_pairs)
+            duplicate_percentage = (total_duplicates / len(df_normalized) * 100) if len(df_normalized) > 0 else 0
+            
+            # Extrapolate to full dataset if needed
+            if self.is_dask:
                 estimated_duplicate_count = int(duplicate_percentage / 100 * self.total_rows)
-                duplicate_count = estimated_duplicate_count
-        
-        return {
-            'duplicate_count': int(duplicate_count),
-            'duplicate_percentage': float(duplicate_percentage),
-            'columns_checked': columns_to_check,
-            'id_columns_excluded': id_columns_excluded,
-            'case_sensitive': case_sensitive,
-            'ignore_whitespace': ignore_whitespace,
-            'similarity_threshold': similarity_threshold,
-            'near_duplicate_count': len(near_duplicate_pairs),
-            'examples': examples
-        }
-        
+                total_duplicates = estimated_duplicate_count
+            
+            return {
+                'exact_duplicates': len(exact_duplicate_indices),
+                'near_duplicates': len(near_duplicate_pairs),
+                'duplicate_pairs': near_duplicate_pairs[:1000],  # Limit the number of pairs
+                'duplicate_rows': list(all_duplicate_indices)[:10000],  # Limit the number of indices
+                'duplicate_percentage': duplicate_percentage,
+                'examples': examples,
+                'error': None
+            }
+            
+        except Exception as e:
+            import traceback
+            error_msg = f"Error in duplicate analysis: {str(e)}\n{traceback.format_exc()}"
+            print(error_msg)
+            return {
+                'exact_duplicates': 0,
+                'near_duplicates': 0,
+                'duplicate_pairs': [],
+                'duplicate_rows': [],
+                'duplicate_percentage': 0,
+                'examples': [],
+                'error': error_msg
+            }
+    
+    
+    
+    def analyze_duplicates_fast(self) -> Dict[str, Any]:
+        """Exact duplicate detection (fast and accurate) without sampling.
+        Works with both Pandas and Dask by leveraging DataFrame.duplicated().
+        - total_duplicates: rows that are part of any duplicate group (keep=False)
+        - exact_duplicates: rows beyond the first occurrence in each duplicate group (keep='first')
+        """
+        try:
+            if self.is_dask:
+                # Dask path: operate on the full dataframe and compute at the end
+                total_rows = int(self.total_rows)
+                dup_mask_all = self.df.duplicated(keep=False)
+                total_duplicates = int(dup_mask_all.sum().compute())
+                exact_duplicates = int(self.df.duplicated(keep='first').sum().compute())
+
+                example_duplicates: List[Dict[str, Any]] = []
+                if total_duplicates > 0:
+                    dup_sample = self.df[dup_mask_all].head(5).compute()
+                    example_duplicates = dup_sample.to_dict(orient='records')
+            else:
+                # Pandas path: full dataframe (no sampling)
+                total_rows = int(len(self.df))
+                dup_mask_all = self.df.duplicated(keep=False)
+                total_duplicates = int(dup_mask_all.sum())
+                exact_duplicates = int(self.df.duplicated(keep='first').sum())
+
+                example_duplicates: List[Dict[str, Any]] = []
+                if total_duplicates > 0:
+                    dup_sample = self.df[dup_mask_all].head(5)
+                    example_duplicates = dup_sample.to_dict(orient='records')
+
+            duplicate_percentage = (total_duplicates / total_rows * 100.0) if total_rows > 0 else 0.0
+
+            return {
+                'exact_duplicates': int(exact_duplicates),
+                'total_duplicates': int(total_duplicates),
+                'duplicate_percentage': float(duplicate_percentage),
+                'total_rows': int(total_rows),
+                'example_duplicates': example_duplicates[:5]
+            }
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return {
+                'error': f"Error in duplicate detection: {str(e)}",
+                'exact_duplicates': 0,
+                'total_duplicates': 0,
+                'duplicate_percentage': 0,
+                'total_rows': 0
+            }
+    
+
+
+
+    
+
     def _detect_case_inconsistencies(self, series: pd.Series) -> List[Dict[str, Any]]:
         """Detect case inconsistencies in string values"""
         if series.dtype != 'object':
@@ -565,27 +637,27 @@ class DataQualityAnalyzer:
                 'bolivia', 'bosnia and herzegovina', 'botswana', 'brazil', 'brunei', 'bulgaria',
                 'burkina faso', 'burundi', 'cabo verde', 'cambodia', 'cameroon', 'canada',
                 'central african republic', 'chad', 'chile', 'china', 'colombia', 'comoros',
-                'congo', 'costa rica', 'croatia', 'cuba', 'cyprus', 'czechia', 'czech republic',
-                'denmark', 'djibouti', 'dominica', 'dominican republic', 'ecuador', 'egypt',
+                'congo', 'costa rica', 'croatia', 'cuba', 'cyprus', 'czech republic',
+                'denmark', 'djibouti', 'dominica', 'dominican republic', 'east timor', 'ecuador', 'egypt',
                 'el salvador', 'equatorial guinea', 'eritrea', 'estonia', 'eswatini', 'ethiopia',
                 'fiji', 'finland', 'france', 'gabon', 'gambia', 'georgia', 'germany', 'ghana',
                 'greece', 'grenada', 'guatemala', 'guinea', 'guinea-bissau', 'guyana', 'haiti',
                 'honduras', 'hungary', 'iceland', 'india', 'indonesia', 'iran', 'iraq', 'ireland',
                 'israel', 'italy', 'jamaica', 'japan', 'jordan', 'kazakhstan', 'kenya', 'kiribati',
-                'korea', 'north korea', 'south korea', 'kosovo', 'kuwait', 'kyrgyzstan', 'laos',
-                'latvia', 'lebanon', 'lesotho', 'liberia', 'libya', 'liechtenstein', 'lithuania',
-                'luxembourg', 'madagascar', 'malawi', 'malaysia', 'maldives', 'mali', 'malta',
-                'marshall islands', 'mauritania', 'mauritius', 'mexico', 'micronesia', 'moldova',
-                'monaco', 'mongolia', 'montenegro', 'morocco', 'mozambique', 'myanmar', 'namibia',
-                'nauru', 'nepal', 'netherlands', 'new zealand', 'nicaragua', 'niger', 'nigeria',
+                'korea, north', 'korea, south', 'kosovo', 'kuwait', 'kyrgyzstan', 'laos', 'latvia',
+                'lebanon', 'lesotho', 'liberia', 'libya', 'liechtenstein', 'lithuania', 'luxembourg',
+                'madagascar', 'malawi', 'malaysia', 'maldives', 'mali', 'malta', 'marshall islands',
+                'mauritania', 'mauritius', 'mexico', 'micronesia', 'moldova', 'monaco', 'mongolia',
+                'montenegro', 'morocco', 'mozambique', 'myanmar', 'namibia', 'nauru', 'nepal',
+                'netherlands', 'new zealand', 'nicaragua', 'niger', 'nigeria', 'north korea',
                 'north macedonia', 'norway', 'oman', 'pakistan', 'palau', 'palestine', 'panama',
-                'papua new guinea', 'paraguay', 'peru', 'philippines', 'poland', 'portugal',
-                'qatar', 'romania', 'russia', 'rwanda', 'saint kitts and nevis', 'saint lucia',
+                'papua new guinea', 'paraguay', 'peru', 'philippines', 'poland', 'portugal', 'qatar',
+                'romania', 'russia', 'rwanda', 'saint kitts and nevis', 'saint lucia',
                 'saint vincent and the grenadines', 'samoa', 'san marino', 'sao tome and principe',
                 'saudi arabia', 'senegal', 'serbia', 'seychelles', 'sierra leone', 'singapore',
-                'slovakia', 'slovenia', 'solomon islands', 'somalia', 'south africa', 'south sudan',
-                'spain', 'sri lanka', 'sudan', 'suriname', 'sweden', 'switzerland', 'syria',
-                'taiwan', 'tajikistan', 'tanzania', 'thailand', 'timor-leste', 'togo', 'tonga',
+                'slovakia', 'slovenia', 'solomon islands', 'somalia', 'south africa', 'south korea',
+                'south sudan', 'spain', 'sri lanka', 'sudan', 'suriname', 'sweden', 'switzerland',
+                'syria', 'taiwan', 'tajikistan', 'tanzania', 'thailand', 'togo', 'tonga',
                 'trinidad and tobago', 'tunisia', 'turkey', 'turkmenistan', 'tuvalu', 'uganda',
                 'ukraine', 'united arab emirates', 'united kingdom', 'united states', 'uruguay',
                 'uzbekistan', 'vanuatu', 'vatican city', 'venezuela', 'vietnam', 'yemen', 'zambia',

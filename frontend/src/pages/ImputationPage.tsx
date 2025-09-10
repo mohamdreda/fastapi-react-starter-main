@@ -27,6 +27,10 @@ interface ImputationParams {
     max_depth?: number;
     random_state?: number;
   };
+  dask_group: {
+    stat: 'mean' | 'median' | 'mode';
+    group_col?: string;
+  };
 }
 
 type AlgorithmKey = keyof ImputationParams;
@@ -36,6 +40,7 @@ const algorithms = [
   { key: 'mice', label: 'MICE' },
   { key: 'knn', label: 'kNN' },
   { key: 'missforest', label: 'MissForest' },
+  { key: 'dask_group', label: 'Dask Grouped' },
 ] as const;
 
 const ImputationPage: React.FC = () => {
@@ -51,6 +56,7 @@ const ImputationPage: React.FC = () => {
     mice: { n_imputations: 5, max_iter: 10, random_state: 42 },
     knn: { n_neighbors: 5, weights: 'uniform' },
     missforest: { n_estimators: 100, max_depth: 10, random_state: 42 },
+    dask_group: { stat: 'median', group_col: '' },
   };
 
   const [selectedAlgo, setSelectedAlgo] = useState<AlgorithmKey>('simple');
@@ -463,6 +469,37 @@ const ImputationPage: React.FC = () => {
             </div>
           </div>
         );
+      
+      case 'dask_group': {
+        const cur = currentParams as any;
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Statistic</label>
+              <select
+                value={cur.stat}
+                onChange={(e) => handleParamChange('dask_group', 'stat', e.target.value)}
+                className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="mean">Mean</option>
+                <option value="median">Median</option>
+                <option value="mode">Mode</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Group Column (optional)</label>
+              <input
+                type="text"
+                value={cur.group_col || ''}
+                onChange={(e) => handleParamChange('dask_group', 'group_col', e.target.value)}
+                className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., customer_id"
+              />
+              <p className="text-xs text-gray-500 mt-1">When provided, the statistic is computed per group.</p>
+            </div>
+          </div>
+        );
+      }
       
       default:
         return null;

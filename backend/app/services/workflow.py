@@ -93,6 +93,33 @@ async def update_template(
     logger.info("Updated template id=%s name=%s version=%s", tmpl.id, tmpl.name, tmpl.version)
     return tmpl
 
+async def delete_template(
+    db: AsyncSession,
+    user: "User",
+    template_id: UUID,
+) -> None:
+    # Load template and check ownership
+    res = await db.execute(select(WorkflowTemplate).where(WorkflowTemplate.id == template_id))
+    tmpl = res.scalars().first()
+    if not tmpl or int(tmpl.owner_id) != int(user.id):
+        raise PermissionError("Template not found or access denied")
+
+    # Nullify references from runs owned by the user that reference this template
+    runs_res = await db.execute(
+        select(WorkflowRun).where(
+            WorkflowRun.template_id == tmpl.id,
+            WorkflowRun.owner_id == user.id,
+        )
+    )
+    runs = runs_res.scalars().all()
+    for r in runs:
+        r.template_id = None
+
+    # Delete template
+    await db.delete(tmpl)
+    await db.commit()
+    logger.info("Deleted template id=%s name=%s owner=%s; detached %d run(s)", tmpl.id, tmpl.name, user.id, len(runs))
+
 # --- Runs listing ---
 async def list_runs(db: AsyncSession, user: "User", dataset_id: Optional[int] = None):
     stmt = (
@@ -133,6 +160,7 @@ async def save_template_from_session(
     template_steps: List[Dict[str, Any]] = []
     for s in filtered:
         template_steps.append({
+            "tool": getattr(s, "tool", None),
             "step": s.step,
             "substep": s.substep,
             "algorithm": s.algorithm or "",

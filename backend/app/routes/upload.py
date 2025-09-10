@@ -10,14 +10,17 @@ from ..services.auth import get_current_user
 from ..services.upload import process_uploaded_file
 from ..utils.logger import setup_logger
 from ..config import get_settings
+from app.config.config import BASE_DIR
 
 logger = setup_logger(__name__)
 settings = get_settings()
 router = APIRouter()
 
-# Use absolute path for uploads
+# Use absolute path for uploads anchored to project BASE_DIR
 UPLOAD_DIR = Path(settings.UPLOAD_DIR)
-UPLOAD_DIR.mkdir(exist_ok=True)
+if not UPLOAD_DIR.is_absolute():
+    UPLOAD_DIR = (BASE_DIR / UPLOAD_DIR).resolve()
+UPLOAD_DIR.mkdir(exist_ok=True, parents=True)
 
 @router.post("/")
 async def upload_file(
@@ -51,7 +54,7 @@ async def upload_file(
 
         # Create user-specific directory
         user_dir = UPLOAD_DIR / str(current_user.id)
-        user_dir.mkdir(exist_ok=True)
+        user_dir.mkdir(exist_ok=True, parents=True)
         
         # Save file with timestamp to avoid duplicates
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

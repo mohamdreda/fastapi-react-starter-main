@@ -14,6 +14,7 @@ from pathlib import Path
 from uuid import UUID
 from datetime import datetime
 from app.services import sessions as session_service
+from app.config.config import BASE_DIR
 
 router = APIRouter()
 
@@ -222,11 +223,36 @@ async def get_visualization(
             print(f"WARNING: Unable to create diagnosis viz session step: {e}")
 
     try:
-        if not os.path.exists(dataset.file_path):
+        # Resolve dataset file path robustly
+        resolved_path = Path(dataset.file_path)
+        if not resolved_path.exists():
+            # If stored path is relative, resolve it against project BASE_DIR
+            if not resolved_path.is_absolute():
+                candidate = (BASE_DIR / resolved_path).resolve()
+                if candidate.exists():
+                    resolved_path = candidate
+                    # Persist the corrected absolute path for future requests
+                    dataset.file_path = str(resolved_path)
+                    await db.commit()
+            else:
+                # Stored path is absolute but not found (e.g., moved host/container)
+                # Try to rebase using the portion after 'uploads' if present
+                lower = dataset.file_path.lower()
+                marker = "uploads"
+                if marker in lower:
+                    idx = lower.rfind(marker)
+                    subpath = dataset.file_path[idx:]
+                    candidate2 = (BASE_DIR / subpath).resolve()
+                    if candidate2.exists():
+                        resolved_path = candidate2
+                        dataset.file_path = str(resolved_path)
+                        await db.commit()
+             
+        if not resolved_path.exists():
             raise FileNotFoundError("Data file not found")
-            
+ 
         viz_data = await generate_visualizations(
-            file_path=dataset.file_path,
+            file_path=str(resolved_path),
             file_type=dataset.file_type,
             viz_type=viz_type
         )

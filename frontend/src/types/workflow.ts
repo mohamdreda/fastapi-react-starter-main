@@ -24,6 +24,7 @@ export interface WorkflowRun {
 }
 
 export interface TemplateStep {
+  tool?: string | null;
   step: string;
   algorithm: string;
   substep?: string | null;

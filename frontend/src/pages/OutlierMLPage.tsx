@@ -249,12 +249,6 @@ const OutlierMLPage: React.FC = () => {
               })(),
               // Include evaluation metrics - check both top-level and nested
               evaluation_metrics: (() => {
-                // Log all available fields for debugging
-                console.log('Available statusData fields:', Object.keys(statusData));
-                if (runDetails) {
-                  console.log('Available runDetails fields:', Object.keys(runDetails));
-                }
-                
                 // First try to get from top-level
                 if (statusData.evaluation_metrics) {
                   console.log('Using top-level evaluation_metrics:', JSON.stringify(statusData.evaluation_metrics));
@@ -397,9 +391,9 @@ const OutlierMLPage: React.FC = () => {
               })(),
               // Include the raw data for potential use
               outlier_results: statusData.outlier_results ||
-                              (runDetails ? runDetails.outlier_results : null) || 
-                              (runDetails && runDetails.outlier_results_json ? 
-                                (typeof runDetails.outlier_results_json === 'string' ? 
+                              (runDetails ? runDetails.outlier_results : null) ||
+                              (runDetails && runDetails.outlier_results_json ?
+                                (typeof runDetails.outlier_results_json === 'string' ?
                                   JSON.parse(runDetails.outlier_results_json) : runDetails.outlier_results_json) : []),
             };
             
@@ -880,11 +874,22 @@ const OutlierMLPage: React.FC = () => {
                 <div className="border rounded-lg p-3 bg-gray-50">
                   <h5 className="text-md font-medium mb-2">Box Plot Analysis</h5>
                   <img 
-                    src={results.box_plot_path?.startsWith('/') ? `${API_BASE_URL}${results.box_plot_path}` : results.box_plot_path} 
+                    src={getImageSrc(results.box_plot_path) || ''} 
                     alt="Box Plot" 
                     className="w-full border rounded shadow-sm"
+                    onError={(e) => {
+                      console.error('Error loading box plot image');
+                      e.currentTarget.style.display = 'none';
+                      const errorDiv = document.createElement('div');
+                      errorDiv.className = 'text-sm text-red-500 p-3 border border-red-300 rounded bg-red-50 my-2';
+                      errorDiv.textContent = 'Unable to display visualization. The image data may be in an unsupported format.';
+                      e.currentTarget.parentNode?.insertBefore(errorDiv, e.currentTarget.nextSibling);
+                    }}
                   />
-                  <div className="text-xs text-gray-500 mt-1">Path: {results.box_plot_path}</div>
+                  {/* Only show path in development mode */}
+                  {import.meta.env.DEV && (
+                    <div className="text-xs text-gray-500 mt-1">Path: {results.box_plot_path?.substring(0, 50)}...</div>
+                  )}
                   <p className="text-xs text-gray-500 mt-2">Box plots showing distribution of features with outliers</p>
                 </div>
               )}

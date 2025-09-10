@@ -16,7 +16,7 @@ async def generate_visualizations(file_path: str, file_type: str, viz_type: str)
     df = read_data_file(file_path, file_type)
     
     # Improved sampling for large datasets
-    if isinstance(df, dd.DataFrame):
+    if isinstance(df, dd.DataFrame) and viz_type != "duplicates":
         try:
             nrows = df.shape[0].compute()
             sample_size = min(max(int(nrows * 0.01), 10000), nrows)
@@ -58,7 +58,10 @@ async def generate_missing_analysis(df) -> dict:
     # Use the enhanced analyzer for comprehensive missing value detection
     analyzer = DataQualityAnalyzer(df)
     missing_analysis = analyzer.analyze_missing_values()
-    
+    fig_bar = None
+    fig_pie = None
+    fig_examples = None
+    fig_pattern = None
     # Ensure total_cells is present
     if 'total_cells' not in missing_analysis:
         # Calculate it if missing
@@ -186,7 +189,14 @@ async def generate_missing_analysis(df) -> dict:
             title=f"Overall Missing Values: {missing_pct:.2f}%",
             color_discrete_sequence=['#FF7F50', '#4682B4']
         )
-    
+    else:
+    # Create an empty pie chart if no missing values
+        fig_pie = px.pie(
+            values=[0, 100],
+            names=['Missing', 'Non-Missing'],
+            title="No Missing Values Found",
+            color_discrete_sequence=['#4682B4', '#4682B4']
+        )
     # Create a table showing examples of missing values
     examples_data = []
     
@@ -224,344 +234,73 @@ async def generate_missing_analysis(df) -> dict:
     # Return in a format expected by the frontend
     # The frontend expects a 'plot' property with 'data' and 'layout'
     return {
-        "plot": plotly_to_json(fig_pie),  # Use the pie chart as the main plot
-        "additional_plots": {
-            "bar_chart": plotly_to_json(fig_bar),
-            "examples_table": plotly_to_json(fig_examples) if fig_examples else None,
-            "heatmap": plotly_to_json(fig_heatmap),
-            "pattern_heatmap": plotly_to_json(fig_pattern) if fig_pattern else None
-        },
-        "stats": {
-            "total_missing": missing_analysis['total_missing'],
-            "missing_percentage": missing_analysis['missing_percentage'],
-            "missing_by_column": {col: stats for col, stats in missing_analysis['per_column'].items()},
-            "null_indicators_used": missing_analysis.get('null_indicators_used', []),
-            "null_indicators_checked": missing_analysis.get('null_indicators_checked', [])
-        }
+    "plot": plotly_to_json(fig_pie) if fig_pie is not None else None,
+    "additional_plots": {
+        "bar_chart": plotly_to_json(fig_bar) if fig_bar is not None else None,
+        "examples_table": plotly_to_json(fig_examples) if fig_examples is not None else None,
+        "heatmap": plotly_to_json(fig_heatmap) if 'fig_heatmap' in locals() and fig_heatmap is not None else None,
+        "pattern_heatmap": plotly_to_json(fig_pattern) if fig_pattern is not None else None
+    },
+    "stats": {
+        "total_missing": missing_analysis['total_missing'],
+        "missing_percentage": missing_analysis['missing_percentage'],
+        "missing_by_column": {col: stats for col, stats in missing_analysis['per_column'].items()},
+        "null_indicators_used": missing_analysis.get('null_indicators_used', []),
+        "null_indicators_checked": missing_analysis.get('null_indicators_checked', [])
     }
+}
 
 async def generate_duplicates_analysis(df) -> dict:
-    """Generate visualizations and statistics for duplicate rows"""
-    if df.empty:
+    """Generate visualizations and statistics for duplicate rows (optimized)."""
+    # Determine row count safely for both Pandas and Dask
+    try:
+        if isinstance(df, dd.DataFrame):
+            nrows = int(df.shape[0].compute())
+        else:
+            nrows = int(len(df))
+    except Exception:
+        nrows = 0
+
+    if nrows == 0:
         return {"error": "Dataset is empty"}
-    
-    # Use the enhanced analyzer for context-aware duplicate detection with near-duplicate detection
+
+    # Use fast, hash-based exact duplicate detection
     analyzer = DataQualityAnalyzer(df)
-    
-    # Run three different duplicate analyses with different settings
-    standard_duplicates = analyzer.analyze_duplicates(
-        case_sensitive=True, 
-        ignore_whitespace=False, 
-        exclude_id_columns=False,
-        similarity_threshold=1.0  # Exact matches only
+    result = analyzer.analyze_duplicates_fast()
+
+    # Handle errors from analyzer
+    if result.get("error"):
+        return {"error": result["error"]}
+
+    # Main pie chart: Duplicates vs Unique
+    duplicate_pct = float(result.get("duplicate_percentage", 0.0))
+    duplicate_pct = max(0.0, min(100.0, duplicate_pct))  # clamp to [0, 100]
+    non_duplicate_pct = 100.0 - duplicate_pct
+
+    fig_pie = px.pie(
+        values=[duplicate_pct, non_duplicate_pct],
+        names=["Duplicates", "Unique"],
+        title=f"Duplicate Rows: {duplicate_pct:.2f}%",
+        color_discrete_sequence=["#FF7F50", "#4682B4"],
     )
-    
-    normalized_duplicates = analyzer.analyze_duplicates(
-        case_sensitive=False, 
-        ignore_whitespace=True, 
-        exclude_id_columns=False,
-        similarity_threshold=1.0  # Exact matches with normalization
-    )
-    
-    smart_duplicates = analyzer.analyze_duplicates(
-        case_sensitive=False, 
-        ignore_whitespace=True, 
-        exclude_id_columns=True,
-        similarity_threshold=0.9  # Include near-duplicates
-    )
-    
-    # Create comparison visualization
-    comparison_data = {
-        'Analysis Type': [
-            'Standard (Exact Match)', 
-            'Normalized (Case-Insensitive, Ignore Whitespace)',
-            'Smart (Normalized + Exclude ID + Near-Duplicates)'
-        ],
-        'Duplicate Count': [
-            standard_duplicates['duplicate_count'],
-            normalized_duplicates['duplicate_count'],
-            smart_duplicates['duplicate_count']
-        ],
-        'Duplicate Percentage': [
-            standard_duplicates['duplicate_percentage'],
-            normalized_duplicates['duplicate_percentage'],
-            smart_duplicates['duplicate_percentage']
-        ]
-    }
-    
-    comparison_df = pd.DataFrame(comparison_data)
-    
-    # Create bar chart comparing different duplicate detection methods
-    fig_comparison = px.bar(
-        comparison_df,
-        x='Analysis Type',
-        y='Duplicate Count',
-        title="Duplicate Detection Comparison",
-        text='Duplicate Count'
-    )
-    fig_comparison.update_layout(xaxis_tickangle=-45)
-    
-    # Create a pie chart showing the proportion of duplicates
-    # Calculate percentages for pie chart
-    duplicate_percentage = smart_duplicates['duplicate_percentage']
-    non_duplicate_percentage = 100 - duplicate_percentage
-    
-    # Round to ensure they sum to exactly 100%
-    duplicate_percentage_rounded = round(duplicate_percentage, 1)
-    non_duplicate_percentage_rounded = round(100 - duplicate_percentage_rounded, 1)
-    
-    # Create pie chart
-    fig_pie = go.Figure()
-    fig_pie.add_trace(go.Pie(
-        labels=["Non-Duplicate", "Duplicate"],
-        values=[non_duplicate_percentage_rounded, duplicate_percentage_rounded],
-        textinfo="percent",
-        insidetextorientation="radial",
-        marker=dict(
-            colors=["#FF9D5C", "#4C78A8"],  # Orange for non-duplicates, blue for duplicates
-        ),
-        hoverinfo="label+percent",
-        textfont=dict(size=14),
-    ))
-    
-    # Update layout
-    fig_pie.update_layout(
-        title={
-            "text": "Duplicate Rows Distribution",
-            "x": 0.5,
-            "font": {"size": 18}
-        },
-        showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=20, r=20, t=60, b=20),
-        height=400,
-        annotations=[
-            dict(
-                text=f"Overall Duplicate Rows: {duplicate_percentage_rounded}%",
-                x=0.5, y=-0.15,
-                xref="paper", yref="paper",
-                showarrow=False,
-                font=dict(size=14)
-            )
-        ]
-    )
-    
-    # Create a heatmap showing where duplicates are located in the dataset
-    # First, get a sample of the data with duplicate flags
-    if isinstance(df, dd.DataFrame):
-        sample_df = df.head(1000)
-    else:
-        sample_size = min(1000, len(df))
-        sample_df = df.sample(n=sample_size) if sample_size > 0 else df
-    
-    # Create a duplicate flag array
-    duplicate_flags = np.zeros(len(sample_df))
-    
-    # Mark rows that are duplicates
-    # Check if duplicate_groups exists in the dictionary
-    if 'duplicate_groups' in smart_duplicates and smart_duplicates['duplicate_groups']:
-        try:
-            for group in smart_duplicates['duplicate_groups']:
-                if 'indices' in group:
-                    for idx in group['indices']:
-                        if isinstance(idx, (int, np.integer)) and idx < len(duplicate_flags):
-                            duplicate_flags[idx] = 1
-        except Exception as e:
-            print(f"Error processing duplicate groups: {e}")
-    elif 'examples' in smart_duplicates and smart_duplicates['examples']:
-        # Fall back to examples if duplicate_groups is not available
-        try:
-            for example in smart_duplicates['examples']:
-                if 'original_index' in example and isinstance(example['original_index'], (int, np.integer)):
-                    idx = example['original_index']
-                    if idx < len(duplicate_flags):
-                        duplicate_flags[idx] = 1
-                if 'duplicate_index' in example and isinstance(example['duplicate_index'], (int, np.integer)):
-                    idx = example['duplicate_index']
-                    if idx < len(duplicate_flags):
-                        duplicate_flags[idx] = 1
-        except Exception as e:
-            print(f"Error processing duplicate examples: {e}")
-    
-    # Create a heatmap showing duplicate locations
-    duplicate_df = pd.DataFrame({
-        'Row Index': range(len(sample_df)),
-        'Is Duplicate': duplicate_flags
-    })
-    
-    fig_heatmap = px.imshow(
-        duplicate_flags.reshape(1, -1),
-        color_continuous_scale=["#4682B4", "#FF7F50"],
-        labels=dict(x="Row Index", y="", color="Is Duplicate"),
-        title="Duplicate Rows Location Heatmap (Sample)"
-    )
-    
-    fig_heatmap.update_layout(
-        height=200,
-        width=900,
-        yaxis_visible=False,
-        coloraxis_showscale=True,
-        coloraxis_colorbar=dict(title="Is Duplicate")
-    )
-    
-    # Create a table of duplicate examples if available
-    fig_examples = None
-    examples_data = []
-    
-    # First try to use duplicate_groups if available
-    if 'duplicate_groups' in smart_duplicates and smart_duplicates['duplicate_groups']:
-        try:
-            # Get the first 5 duplicate groups
-            for i, group in enumerate(smart_duplicates['duplicate_groups'][:5]):
-                if 'indices' in group:
-                    for j, row_index in enumerate(group['indices']):
-                        if not isinstance(row_index, (int, np.integer)):
-                            continue
-                            
-                        # Get row data for display
-                        row_data = {}
-                        
-                        # Add group identifier
-                        row_data['Duplicate Group'] = f"Group {i+1}"
-                        row_data['Row Index'] = row_index
-                        
-                        # Add a few key columns for context
-                        for col in list(df.columns)[:5]:  # Show first 5 columns
-                            try:
-                                if isinstance(df, dd.DataFrame):
-                                    # For Dask, we need to compute the value
-                                    row_data[col] = str(df[col].compute().iloc[row_index])
-                                else:
-                                    row_data[col] = str(df[col].iloc[row_index])
-                            except Exception as e:
-                                row_data[col] = f"Error: {str(e)}"
-                        
-                        examples_data.append(row_data)
-        except Exception as e:
-            print(f"Error creating examples table from duplicate_groups: {e}")
-    
-    # Fall back to examples if duplicate_groups is not available or failed
-    if not examples_data and 'examples' in smart_duplicates and smart_duplicates['examples']:
-        try:
-            for i, example in enumerate(smart_duplicates['examples'][:5]):
-                # Process original row
-                if 'original_index' in example and isinstance(example['original_index'], (int, np.integer)):
-                    row_data = {}
-                    row_data['Duplicate Group'] = f"Pair {i+1}"
-                    row_data['Row Type'] = 'Original'
-                    row_data['Row Index'] = example['original_index']
-                    
-                    # Add sample columns
-                    for col in list(df.columns)[:5]:
-                        try:
-                            if isinstance(df, dd.DataFrame):
-                                row_data[col] = str(df[col].compute().iloc[example['original_index']])
-                            else:
-                                row_data[col] = str(df[col].iloc[example['original_index']])
-                        except Exception as e:
-                            row_data[col] = f"Error: {str(e)}"
-                    
-                    examples_data.append(row_data)
-                
-                # Process duplicate row
-                if 'duplicate_index' in example and isinstance(example['duplicate_index'], (int, np.integer)):
-                    row_data = {}
-                    row_data['Duplicate Group'] = f"Pair {i+1}"
-                    row_data['Row Type'] = 'Duplicate'
-                    row_data['Row Index'] = example['duplicate_index']
-                    
-                    # Add sample columns
-                    for col in list(df.columns)[:5]:
-                        try:
-                            if isinstance(df, dd.DataFrame):
-                                row_data[col] = str(df[col].compute().iloc[example['duplicate_index']])
-                            else:
-                                row_data[col] = str(df[col].iloc[example['duplicate_index']])
-                        except Exception as e:
-                            row_data[col] = f"Error: {str(e)}"
-                    
-                    examples_data.append(row_data)
-        except Exception as e:
-            print(f"Error creating examples table from examples: {e}")
-        
-        if examples_data:
-            examples_df = pd.DataFrame(examples_data)
-            fig_examples = go.Figure(
-                data=[go.Table(
-                    header=dict(
-                        values=list(examples_df.columns),
-                        fill_color='paleturquoise',
-                        align='left'
-                    ),
-                    cells=dict(
-                        values=[examples_df[col] for col in examples_df.columns],
-                        fill_color='lavender',
-                        align='left'
-                    )
-                )]
-            )
-            fig_examples.update_layout(
-                title="Examples of Detected Duplicates"
-            )
-    
-    # Create a table showing excluded ID columns if any
-    fig_id_cols = None
-    if smart_duplicates['id_columns_excluded']:
-        id_cols_data = {
-            'ID Column': smart_duplicates['id_columns_excluded'],
-            'Reason': ['Detected as ID column based on name and content' for _ in smart_duplicates['id_columns_excluded']]
-        }
-        id_cols_df = pd.DataFrame(id_cols_data)
-        
-        fig_id_cols = go.Figure(data=[go.Table(
-            header=dict(
-                values=list(id_cols_df.columns),
-                fill_color='paleturquoise',
-                align='left'
-            ),
-            cells=dict(
-                values=[id_cols_df[col] for col in id_cols_df.columns],
-                fill_color='lavender',
-                align='left'
-            )
-        )])
-        fig_id_cols.update_layout(title="ID Columns Excluded from Duplicate Detection")
-    
-    # Return in a format expected by the frontend
-    # The frontend expects a 'plot' property with 'data' and 'layout'
-    return {
-        "plot": plotly_to_json(fig_comparison),  # Main plot is the comparison bar chart
-        "additional_plots": {
-            "pie_chart": plotly_to_json(fig_pie),
-            "heatmap": plotly_to_json(fig_heatmap),
-            "examples": plotly_to_json(fig_examples) if fig_examples else None,
-            "id_columns": plotly_to_json(fig_id_cols) if fig_id_cols else None
-        },
+
+    response = {
+        "plot": plotly_to_json(fig_pie),
+        "additional_plots": {},
         "stats": {
-            "standard": {
-                "duplicate_count": standard_duplicates['duplicate_count'],
-                "duplicate_percentage": standard_duplicates['duplicate_percentage']
-            },
-            "normalized": {
-                "duplicate_count": normalized_duplicates['duplicate_count'],
-                "duplicate_percentage": normalized_duplicates['duplicate_percentage'],
-                "ignore_whitespace": normalized_duplicates['ignore_whitespace']
-            },
-            "smart": {
-                "duplicate_count": smart_duplicates['duplicate_count'],
-                "duplicate_percentage": smart_duplicates['duplicate_percentage'],
-                "id_columns_excluded": smart_duplicates['id_columns_excluded'],
-                "columns_checked": smart_duplicates['columns_checked'],
-                "near_duplicate_count": smart_duplicates.get('near_duplicate_count', 0),
-                "similarity_threshold": smart_duplicates.get('similarity_threshold', 0.9)
-            }
+            "exact_duplicates": int(result.get("exact_duplicates", 0)),
+            "total_duplicates": int(result.get("total_duplicates", 0)),
+            "duplicate_percentage": duplicate_pct,
+            "total_rows": int(result.get("total_rows", nrows)),
         },
-        "total_rows": analyzer.total_rows,
-        "duplicate_rows": smart_duplicates['duplicate_count'],
-        "duplicate_percentage": smart_duplicates['duplicate_percentage'],
-        "additional_duplicates_found": smart_duplicates['duplicate_count'] - standard_duplicates['duplicate_count']
     }
 
+    # Include a few example duplicate rows if provided by analyzer
+    examples = result.get("example_duplicates") or []
+    if examples:
+        response["examples"] = examples[:5]
+
+    return response
 
 async def generate_categorical_analysis(df) -> dict:
     """Analyze and visualize categorical columns with enhanced validation"""
@@ -691,6 +430,7 @@ async def generate_categorical_analysis(df) -> dict:
         "issue_tables": issue_tables,
         "analysis": analysis
     }
+
 async def generate_outlier_analysis(df) -> dict:
     """Detect and visualize outliers in numerical columns"""
     if df.empty:

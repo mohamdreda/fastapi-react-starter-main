@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 class TemplateStep(BaseModel):
+    tool: Optional[str] = None
     step: str
     algorithm: str
     substep: Optional[str] = None

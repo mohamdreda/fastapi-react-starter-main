@@ -78,16 +78,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
       formData.append('email', credentials.email);
       formData.append('password', credentials.password);
 
+      // Add timeout so fetch doesn't hang forever if API is unreachable
+      const controller = new AbortController();
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, 15000); // 15s timeout
+
+      console.log('[Auth] Logging in to', `${API_URL}/api/v1/auth/login`);
+
       const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
         body: formData,
         credentials: 'include',
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
   
-      const data = await response.json();
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch (e) {
+        // If server didn't return JSON, provide a generic message
+        console.warn('[Auth] Non-JSON response from /auth/login', e);
+      }
   
       if (!response.ok) {
-        const errorMessage = data.detail || 'Login failed';
+        const errorMessage = (data && data.detail) || `Login failed (${response.status})`;
+        console.error('[Auth] Login failed:', errorMessage);
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
         return { success: false, error: errorMessage };
       }
@@ -101,7 +119,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         payload: { token, user: data.user }
       });
   
-      // Auto-start a workflow session and store id
+      // Auto-start a workflow session and store id (best-effort)
       try {
         const sessResp = await fetch(`${API_URL}/api/v1/sessions/`, {
           method: 'POST',
@@ -119,9 +137,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (sess?.id) {
             localStorage.setItem('active_session_id', sess.id);
           }
+        } else {
+          console.warn('[Auth] Failed to auto-create session:', sessResp.status);
         }
-      } catch {
-        // non-blocking if session creation fails
+      } catch (e) {
+        console.warn('[Auth] Session creation skipped (non-blocking):', e);
       }
 
       // Redirect based on role
@@ -133,8 +153,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   
       return { success: true, error: null };
   
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error';
+    } catch (error: any) {
+      const isAbort = error?.name === 'AbortError';
+      const errorMessage = isAbort ? 'Login request timed out. Check API URL or backend availability.' : (error instanceof Error ? error.message : 'Network error');
+      console.error('[Auth] Login error:', errorMessage);
       dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
       return { success: false, error: errorMessage };
     } finally {

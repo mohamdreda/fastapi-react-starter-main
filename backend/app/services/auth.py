@@ -68,6 +68,27 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
 
+async def get_current_user_id(
+    token: str = Depends(oauth2_scheme),
+) -> int:
+    """Get current authenticated user's ID from JWT token without DB access.
+    Useful for high-frequency polling endpoints to avoid extra DB load.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id_raw = payload.get("sub")
+        user_id: Optional[int] = int(user_id_raw) if user_id_raw is not None else None
+        if user_id is None:
+            raise credentials_exception
+        return user_id
+    except JWTError:
+        raise credentials_exception
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash"""
     return pwd_context.verify(plain_password, hashed_password)

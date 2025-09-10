@@ -680,12 +680,12 @@ export const DiagnosisDashboard: React.FC = () => {
                 <section className="bg-white dark:bg-gray-800 shadow dark:shadow-sm rounded-lg p-4 text-gray-900 dark:text-white">
                   <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-100">Duplicate Rows Analysis</h3>
                   
-                  {/* Display pie chart if available */}
-                  {visualizations.duplicates.additional_plots && visualizations.duplicates.additional_plots.pie_chart ? (
+                  {/* Pie chart (use 'plot' key, fallback to 'additional_plots.pie_chart') */}
+                  {(visualizations.duplicates.plot || visualizations.duplicates.additional_plots?.pie_chart) ? (
                     <Plot
-                      data={visualizations.duplicates.additional_plots.pie_chart.data}
+                      data={(visualizations.duplicates.plot?.data || visualizations.duplicates.additional_plots?.pie_chart?.data)}
                       layout={{
-                        ...visualizations.duplicates.additional_plots.pie_chart.layout,
+                        ...(visualizations.duplicates.plot?.layout || visualizations.duplicates.additional_plots?.pie_chart?.layout || {}),
                         height: 400,
                         margin: { t: 40, r: 20, b: 60, l: 60 },
                         font: { color: plotFontColor },

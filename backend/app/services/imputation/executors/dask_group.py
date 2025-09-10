@@ -11,24 +11,43 @@ def run(df: pd.DataFrame, params: Dict):
     ddf = dd.from_pandas(df, npartitions=16)
     df_filled = df.copy()
 
-    for col in df.columns:
-        if df[col].isna().any():
-            if group_col and group_col in df.columns:
-                grouped = ddf.groupby(group_col)[col]
-                if stat == "mean":
-                    fill_values = grouped.mean().compute()
-                elif stat == "median":
-                    fill_values = grouped.median().compute()
-                else:
-                    fill_values = grouped.apply(lambda x: x.mode().iloc[0], meta=(col, df[col].dtype)).compute()
+    numeric_cols = set(df.select_dtypes(include=["number"]).columns)
 
-                df_filled[col] = df[col].fillna(df[group_col].map(fill_values))
+    for col in df.columns:
+        if not df[col].isna().any():
+            continue
+
+        is_numeric = col in numeric_cols
+
+        if group_col and group_col in df.columns:
+            grouped = ddf.groupby(group_col)[col]
+            if is_numeric and stat == "mean":
+                fill_values = grouped.mean().compute()
+            elif is_numeric and stat == "median":
+                fill_values = grouped.median().compute()
             else:
-                if stat == "mean":
-                    value = df[col].mean()
-                elif stat == "median":
-                    value = df[col].median()
-                else:
-                    value = df[col].mode().iloc[0]
+                # Fallback to mode for non-numeric or when 'mode' requested
+                def _mode(s: pd.Series):
+                    m = s.mode(dropna=True)
+                    return m.iloc[0] if not m.empty else None
+
+                fill_values = grouped.apply(
+                    _mode,
+                    meta=(col, df[col].dtype),
+                ).compute()
+
+            mapped = df[group_col].map(fill_values)
+            df_filled[col] = df[col].fillna(mapped)
+        else:
+            if is_numeric and stat == "mean":
+                value = df[col].mean()
+            elif is_numeric and stat == "median":
+                value = df[col].median()
+            else:
+                mode_series = df[col].mode(dropna=True)
+                value = mode_series.iloc[0] if not mode_series.empty else None
+
+            if value is not None:
                 df_filled[col] = df[col].fillna(value)
+
     return df_filled

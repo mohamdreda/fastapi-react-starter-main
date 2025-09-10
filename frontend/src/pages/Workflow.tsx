@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { toPng } from 'html-to-image';
+import { toPng, toBlob } from 'html-to-image';
 import { WorkflowRun, WorkflowTemplate, WorkflowStepRun, TemplateStep } from '@/types/workflow';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/axios';
@@ -12,6 +12,8 @@ interface Dataset {
 const WorkflowPage: React.FC = () => {
   const { token } = useAuth();
   const workflowContainerRef = useRef<HTMLDivElement>(null);
+  // Inner content ref: we export this (full width) instead of the scroll container to avoid cropping
+  const workflowContentRef = useRef<HTMLDivElement>(null);
   const sessionId = localStorage.getItem('active_session_id') || '';
 
   // États pour la sélection et l'affichage
@@ -265,6 +267,249 @@ const WorkflowPage: React.FC = () => {
     return stepRaw || toolTitle || 'Step';
   };
 
+  // Formatter for template steps in the editor (TemplateStep has optional 'tool')
+  const formatTemplateStepLabel = (st: TemplateStep) => {
+    return formatStepLabel(st as any);
+  };
+
+  // Friendly display names for encoding/scaling methods
+  const friendlyEncodingName = (raw?: string) => {
+    const k = (raw || '').toLowerCase().replace(/\s+/g, '_');
+    const map: Record<string, string> = {
+      label: 'Label Encoding',
+      label_encoding: 'Label Encoding',
+      one_hot: 'One-Hot Encoding',
+      onehot: 'One-Hot Encoding',
+      one_hot_encoding: 'One-Hot Encoding',
+      ordinal: 'Ordinal Encoding',
+      target: 'Target Encoding',
+      frequency: 'Frequency Encoding',
+      binary: 'Binary Encoding',
+      hash: 'Hashing Encoding',
+      hashing: 'Hashing Encoding',
+    };
+    return map[k] || (raw ? raw : 'Method');
+  };
+
+  const friendlyScalingName = (raw?: string) => {
+    const k = (raw || '').toLowerCase().replace(/\s+/g, '_');
+    const map: Record<string, string> = {
+      standardization: 'Standardization',
+      standard_scaler: 'Standardization',
+      minmax: 'Min-Max Scaling',
+      min_max: 'Min-Max Scaling',
+      min_max_scaler: 'Min-Max Scaling',
+      normalization: 'Normalization',
+      normalize: 'Normalization',
+      robust: 'Robust Scaling',
+      robust_scaler: 'Robust Scaling',
+    };
+    return map[k] || (raw ? raw : 'Scaling');
+  };
+
+  // Renders a concise summary for categorical encoding configuration if present
+  const renderCategoricalSummary = (cfg: any) => {
+    const ce = cfg?.categorical_encoding;
+    const methods: Array<{ method?: string; columns?: string[] }> = Array.isArray(ce?.methods)
+      ? ce.methods
+      : [];
+    if (!methods.length) return null;
+    return (
+      <div className="mt-1 space-y-1">
+        <div className="text-[11px] text-gray-500">Categorical Encoding</div>
+        <ul className="pl-3 list-disc space-y-1">
+          {methods.map((m, i) => (
+            <li key={i} className="text-xs text-gray-700">
+              <span className="inline-flex items-center px-2 py-0.5 mr-2 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">
+                {friendlyEncodingName(m?.method)}
+                {Array.isArray(m?.columns) && m.columns!.length > 0 ? ` (${m.columns!.length} cols)` : ''}
+              </span>
+              {Array.isArray(m?.columns) && m!.columns!.length > 0 && (
+                <span className="inline-flex flex-wrap gap-1 align-middle">
+                  {m!.columns!.map((c, idx) => (
+                    <span key={idx} className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200">
+                      {c}
+                    </span>
+                  ))}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  // Renders a concise summary for feature scaling configuration if present
+  const renderFeatureScalingSummary = (cfg: any) => {
+    const fs = cfg?.feature_scaling;
+    const methods: Array<{ method?: string; columns?: string[] }> = Array.isArray(fs?.methods)
+      ? fs.methods
+      : [];
+    if (!methods.length) return null;
+    return (
+      <div className="mt-2 space-y-1">
+        <div className="text-[11px] text-gray-500">Feature Scaling</div>
+        <ul className="pl-3 list-disc space-y-1">
+          {methods.map((m, i) => (
+            <li key={i} className="text-xs text-gray-700">
+              <span className="inline-flex items-center px-2 py-0.5 mr-2 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">
+                {friendlyScalingName(m?.method)}
+                {Array.isArray(m?.columns) && m.columns!.length > 0 ? ` (${m.columns!.length} cols)` : ''}
+              </span>
+              {Array.isArray(m?.columns) && m!.columns!.length > 0 && (
+                <span className="inline-flex flex-wrap gap-1 align-middle">
+                  {m!.columns!.map((c, idx) => (
+                    <span key={idx} className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200">
+                      {c}
+                    </span>
+                  ))}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  // Combines summaries and hides when nothing is used
+  const renderConfigSummary = (cfg: any) => {
+    const cat = renderCategoricalSummary(cfg);
+    const scale = renderFeatureScalingSummary(cfg);
+    if (!cat && !scale) return null;
+    return (
+      <div className="mt-1">
+        {cat}
+        {scale}
+      </div>
+    );
+  };
+
+  // Deduplication helpers (Similarity / Classification / Clustering / Result)
+  const friendlyModelName = (raw?: string) => {
+    const k = (raw || '').toLowerCase();
+    const map: Record<string, string> = {
+      random_forest: 'Random Forest',
+      logistic_regression: 'Logistic Regression',
+      xgboost: 'XGBoost',
+      svm: 'SVM',
+      knn: 'k-NN',
+    };
+    return map[k] || (raw ? raw : 'Model');
+  };
+
+  const friendlyClusterMethod = (raw?: string) => {
+    const k = (raw || '').toLowerCase();
+    const map: Record<string, string> = {
+      graph_connected_components: 'Graph Connected Components',
+      dbscan: 'DBSCAN',
+      hdbscan: 'HDBSCAN',
+    };
+    return map[k] || (raw ? raw : 'Method');
+  };
+
+  const friendlyResultMethod = (raw?: string) => {
+    const k = (raw || '').toLowerCase();
+    const map: Record<string, string> = {
+      keep_first: 'Keep First',
+      keep_longest: 'Keep Longest',
+      keep_best: 'Keep Best',
+    };
+    return map[k] || (raw ? raw : 'Method');
+  };
+
+  const renderSimilarityFieldConfigs = (fieldConfigs: any) => {
+    if (!fieldConfigs || typeof fieldConfigs !== 'object') return null;
+    const entries = Object.entries(fieldConfigs);
+    if (entries.length === 0) return null;
+    const maxPreview = 3;
+    const preview = entries.slice(0, maxPreview);
+    const remaining = entries.length - preview.length;
+    return (
+      <div className="mt-1 space-y-1">
+        <div className="text-[11px] text-gray-500">Field configs</div>
+        <ul className="pl-3 list-disc space-y-1">
+          {preview.map(([field, cfg]: any, i: number) => (
+            <li key={i} className="text-xs text-gray-700">
+              <span className="inline-flex items-center px-2 py-0.5 mr-2 rounded bg-blue-50 text-blue-700 border border-blue-100">{field}</span>
+              {cfg?.method && (
+                <span className="inline-flex items-center px-2 py-0.5 mr-2 rounded bg-gray-100 text-gray-800 border border-gray-200">{String(cfg.method)}</span>
+              )}
+              {cfg?.weight !== undefined && (
+                <span className="inline-flex items-center px-2 py-0.5 mr-2 rounded bg-amber-50 text-amber-700 border border-amber-100">w={String(cfg.weight)}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+        {remaining > 0 && (
+          <div className="text-[11px] text-gray-500">+{remaining} more field(s)</div>
+        )}
+      </div>
+    );
+  };
+
+  const renderDedupSummary = (tool: string, params: any) => {
+    const key = (tool || '').toLowerCase();
+    if (!params || typeof params !== 'object') return null;
+    if (key === 'classification') {
+      const m = friendlyModelName(params?.method || params?.model);
+      const chips: string[] = [];
+      if (params?.n_estimators !== undefined) chips.push(`n_estimators: ${params.n_estimators}`);
+      if (params?.max_depth !== undefined) chips.push(`max_depth: ${params.max_depth}`);
+      if (params?.confidence_threshold !== undefined) chips.push(`confidence: ${params.confidence_threshold}`);
+      return (
+        <div className="space-y-1">
+          <div className="text-[11px] text-gray-500">Classification</div>
+          <div className="flex flex-wrap gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-100">{m}</span>
+            {chips.map((c, i) => (
+              <span key={i} className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200">{c}</span>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    if (key === 'clustering') {
+      const m = friendlyClusterMethod(params?.method);
+      const chips: string[] = [];
+      if (params?.confidence_threshold !== undefined) chips.push(`confidence: ${params.confidence_threshold}`);
+      return (
+        <div className="space-y-1">
+          <div className="text-[11px] text-gray-500">Clustering</div>
+          <div className="flex flex-wrap gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">{m}</span>
+            {chips.map((c, i) => (
+              <span key={i} className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200">{c}</span>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    if (key === 'result') {
+      const m = friendlyResultMethod(params?.method);
+      return (
+        <div className="space-y-1">
+          <div className="text-[11px] text-gray-500">Result</div>
+          <div className="flex flex-wrap gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-50 text-slate-700 border border-slate-100">{m}</span>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Extract dataset id from common shapes
+  const extractDatasetId = (params: any): string | number | null => {
+    if (!params) return null;
+    return (
+      params.dataset_id ??
+      params.datasetId ??
+      (typeof params.dataset === 'object' && params.dataset ? params.dataset.id : null)
+    );
+  };
+
   // Hydrater l'éditeur dès qu'un template est sélectionné
   useEffect(() => {
     if (selectedTemplate) {
@@ -277,14 +522,68 @@ const WorkflowPage: React.FC = () => {
 
   // Exporter le diagramme en PNG (également disponible par clic sur le diagramme en mode lecture)
   const handleExportPng = useCallback(async () => {
-    const node = workflowContainerRef.current;
-    if (!node) return;
-    const dataUrl = await toPng(node, { cacheBust: true, pixelRatio: 2 });
-    const link = document.createElement('a');
-    link.download = `${editableTemplateName || 'workflow'}.png`;
-    link.href = dataUrl;
-    link.click();
+    // Prefer the inner content (full scrollable width/height)
+    const node = (workflowContentRef.current || workflowContainerRef.current) as HTMLElement | null;
+    if (!node) {
+      alert('Aucun contenu à exporter.');
+      return;
+    }
+    // Compute full content dimensions to include all horizontally scrolled steps
+    const width = Math.min(node.scrollWidth || node.offsetWidth || 0, 12000); // hard cap to avoid OOM
+    const height = Math.min(node.scrollHeight || node.offsetHeight || 0, 8000);
+    const options = { cacheBust: true, pixelRatio: 2, width, height, backgroundColor: '#ffffff' } as const;
+    try {
+      const dataUrl = await toPng(node, options);
+      const link = document.createElement('a');
+      link.download = `${editableTemplateName || 'workflow'}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('[Workflow] toPng failed, trying toBlob fallback:', err);
+      try {
+        const blob = await toBlob(node, options);
+        if (!blob) throw new Error('Blob is null');
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${editableTemplateName || 'workflow'}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (err2) {
+        console.error('[Workflow] toBlob fallback failed:', err2);
+        alert("Échec de l'export PNG. Consultez la console pour les détails.");
+      }
+    }
   }, [workflowContainerRef, editableTemplateName]);
+
+  // Exporter le template/workflow en JSON
+  const handleExportTemplateJson = useCallback(() => {
+    try {
+      const payload = selectedTemplate && selectedTemplate.steps?.length
+        ? selectedTemplate
+        : {
+            name: (editableTemplateName || 'workflow').trim(),
+            description: editableTemplateDesc || undefined,
+            steps: editableSteps,
+          };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${(editableTemplateName || selectedTemplate?.name || 'workflow').trim()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('[Workflow] JSON export failed:', e);
+      alert("Échec de l'export JSON.");
+    }
+  }, [selectedTemplate, editableTemplateName, editableTemplateDesc, editableSteps]);
 
   // Helpers d'édition
   const moveStepUp = (idx: number) => {
@@ -312,7 +611,7 @@ const WorkflowPage: React.FC = () => {
   const addStep = () => {
     setEditableSteps((prev) => [
       ...prev,
-      { step: 'step_name', algorithm: 'algorithm_name', substep: undefined, params: {} },
+      { tool: '', step: 'step_name', algorithm: 'algorithm_name', substep: undefined, params: {} },
     ]);
   };
 
@@ -359,6 +658,30 @@ const WorkflowPage: React.FC = () => {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail || err?.message;
       setErrorMsg(`Échec de la mise à jour du template${status ? ` (HTTP ${status})` : ''}. ${detail ?? ''}`);
+    }
+  };
+
+  const handleDeleteTemplate = async (id: string) => {
+    if (!id) return;
+    const ok = window.confirm('Supprimer ce template ? Cette action est irréversible.');
+    if (!ok) return;
+    try {
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      await api.delete(`workflows/templates/${id}`);
+      setTemplates((prev) => prev.filter((t) => t.id !== id));
+      if (selectedTemplate?.id === id) {
+        setSelectedTemplate(null);
+        setEditMode(false);
+        setEditableSteps([]);
+        setEditableTemplateName('');
+        setEditableTemplateDesc('');
+      }
+      setSuccessMsg('Template supprimé.');
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const detail = err?.response?.data?.detail || err?.message;
+      setErrorMsg(`Échec de la suppression du template${status ? ` (HTTP ${status})` : ''}. ${detail ?? ''}`);
     }
   };
 
@@ -459,13 +782,59 @@ const WorkflowPage: React.FC = () => {
                               {s.status || '—'}
                             </span>
                           </div>
+                          {extractDatasetId(s.params) !== null && (
+                            <div className="mt-1 text-[11px] text-gray-500">
+                              Dataset:{' '}
+                              <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200">
+                                {String(extractDatasetId(s.params))}
+                              </span>
+                            </div>
+                          )}
                           {s.params && Object.keys(s.params || {}).length > 0 && (
                             <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-700">
-                              {Object.entries(s.params).map(([k, v]) => (
-                                <div key={k}>
-                                  <span className="font-semibold">{k}:</span> {String(v)}
-                                </div>
-                              ))}
+                              {Object.entries(s.params)
+                                .filter(([_, v]) => v !== null && v !== undefined)
+                                .map(([k, v]) => {
+                                  const tool = (s?.tool || s?.step || '').toLowerCase();
+                                  // Deduplication: replace noisy JSON with summaries
+                                  if (k === 'field_configs' && tool === 'similarity' && typeof v === 'object') {
+                                    return (
+                                      <div key={k} className="break-all">{renderSimilarityFieldConfigs(v)}</div>
+                                    );
+                                  }
+                                  if (k === 'params' && ['classification','clustering','result','similarity'].includes(tool) && typeof v === 'object') {
+                                    return (
+                                      <div key={k} className="break-all">{renderDedupSummary(tool, v)}</div>
+                                    );
+                                  }
+                                  if (k === 'method' && (tool === 'classification' || tool === 'clustering' || tool === 'result')) {
+                                    const friendly = tool === 'classification' ? friendlyModelName(String(v)) : tool === 'clustering' ? friendlyClusterMethod(String(v)) : friendlyResultMethod(String(v));
+                                    return (
+                                      <div key={k} className="break-all">
+                                        <span className="font-semibold">{k}:</span> {friendly}
+                                      </div>
+                                    );
+                                  }
+                                  if (k === 'config' && typeof v === 'object') {
+                                    return (
+                                      <div key={k} className="break-all">
+                                        {renderConfigSummary(v)}
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <div key={k} className="break-all">
+                                      <span className="font-semibold">{k}:</span>{' '}
+                                      {typeof v === 'object' && v !== null ? (
+                                        <pre className="mt-1 p-2 bg-gray-50 border rounded overflow-auto max-h-40 whitespace-pre-wrap">
+                                          {JSON.stringify(v, null, 2)}
+                                        </pre>
+                                      ) : (
+                                        String(v)
+                                      )}
+                                    </div>
+                                  );
+                                })}
                             </div>
                           )}
                         </li>
@@ -502,6 +871,14 @@ const WorkflowPage: React.FC = () => {
                       {t.created_at ? new Date(t.created_at).toLocaleString() : '—'} · {t.steps?.length ?? 0} étape(s)
                     </div>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(t.id); }}
+                      className="px-2 py-1 text-xs rounded bg-red-50 text-red-700 hover:bg-red-100"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -515,6 +892,7 @@ const WorkflowPage: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-800">Éditeur de Workflow</h2>
               <div className="flex gap-2">
                 <button onClick={handleExportPng} className="px-3 py-1.5 text-sm rounded bg-gray-100 hover:bg-gray-200">Télécharger PNG</button>
+                <button onClick={handleExportTemplateJson} className="px-3 py-1.5 text-sm rounded bg-gray-100 hover:bg-gray-200">Télécharger JSON</button>
                 <button onClick={() => setEditMode((v) => !v)} className="px-3 py-1.5 text-sm rounded bg-gray-100 hover:bg-gray-200">
                   {editMode ? "Terminer l'édition" : 'Modifier'}
                 </button>
@@ -561,7 +939,7 @@ const WorkflowPage: React.FC = () => {
               onClick={!editMode ? handleExportPng : undefined}
               title={!editMode ? 'Cliquez pour télécharger en PNG' : undefined}
             >
-              <div className="min-w-full flex items-stretch gap-4">
+              <div ref={workflowContentRef} className="min-w-full flex items-stretch gap-4">
                 {editableSteps.length === 0 ? (
                   <div className="text-sm text-gray-500">Aucune étape.</div>
                 ) : (
@@ -571,6 +949,10 @@ const WorkflowPage: React.FC = () => {
                         <div className="text-xs text-gray-500 mb-1">Étape {idx + 1}</div>
                         {editMode ? (
                           <div className="space-y-2">
+                            <div>
+                              <label className="block text-xs text-gray-600">Tool</label>
+                              <input value={(st as any).tool || ''} onChange={(e) => updateStepField(idx, 'tool' as any, e.target.value)} className="w-full p-2 border rounded" />
+                            </div>
                             <div>
                               <label className="block text-xs text-gray-600">Step</label>
                               <input value={st.step} onChange={(e) => updateStepField(idx, 'step', e.target.value)} className="w-full p-2 border rounded" />
@@ -595,14 +977,61 @@ const WorkflowPage: React.FC = () => {
                           </div>
                         ) : (
                           <div>
-                            <div className="font-medium">{st.step} · {st.algorithm}</div>
+                            <div className="font-medium">{formatTemplateStepLabel(st)}</div>
+                            {st.algorithm && <div className="text-xs text-gray-600">{st.algorithm}</div>}
                             {st.substep && <div className="text-xs text-gray-600">{st.substep}</div>}
+                            {extractDatasetId(st.params) !== null && (
+                              <div className="mt-1 text-[11px] text-gray-500">
+                                Dataset:{' '}
+                                <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200">
+                                  {String(extractDatasetId(st.params))}
+                                </span>
+                              </div>
+                            )}
                             {st.params && Object.keys(st.params).length > 0 && (
                               <div className="mt-2 text-xs text-gray-700">
-                                {Object.entries(st.params).slice(0, 4).map(([k, v]) => (
-                                  <div key={k}><span className="font-semibold">{k}:</span> {String(v)}</div>
-                                ))}
-                                {Object.keys(st.params).length > 4 && <div className="text-gray-400">…</div>}
+                                {Object.entries(st.params)
+                                  .filter(([_, v]) => v !== null && v !== undefined)
+                                  .map(([k, v]) => {
+                                    const tool = ((st as any)?.tool || st.step || '').toLowerCase();
+                                    if (k === 'field_configs' && tool === 'similarity' && typeof v === 'object') {
+                                      return (
+                                        <div key={k} className="break-all">{renderSimilarityFieldConfigs(v)}</div>
+                                      );
+                                    }
+                                    if (k === 'params' && ['classification','clustering','result','similarity'].includes(tool) && typeof v === 'object') {
+                                      return (
+                                        <div key={k} className="break-all">{renderDedupSummary(tool, v)}</div>
+                                      );
+                                    }
+                                    if (k === 'method' && (tool === 'classification' || tool === 'clustering' || tool === 'result')) {
+                                      const friendly = tool === 'classification' ? friendlyModelName(String(v)) : tool === 'clustering' ? friendlyClusterMethod(String(v)) : friendlyResultMethod(String(v));
+                                      return (
+                                        <div key={k} className="break-all">
+                                          <span className="font-semibold">{k}:</span> {friendly}
+                                        </div>
+                                      );
+                                    }
+                                    if (k === 'config' && typeof v === 'object') {
+                                      return (
+                                        <div key={k} className="break-all">
+                                          {renderConfigSummary(v)}
+                                        </div>
+                                      );
+                                    }
+                                    return (
+                                      <div key={k} className="break-all">
+                                        <span className="font-semibold">{k}:</span>{' '}
+                                        {typeof v === 'object' && v !== null ? (
+                                          <pre className="mt-1 p-2 bg-gray-50 border rounded overflow-auto max-h-40 whitespace-pre-wrap">
+                                            {JSON.stringify(v, null, 2)}
+                                          </pre>
+                                        ) : (
+                                          String(v)
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                               </div>
                             )}
                           </div>
